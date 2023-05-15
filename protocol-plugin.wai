@@ -1,0 +1,24 @@
+add-three: func(number: u32) -> u32
+
+get-color: func() -> color
+
+get-complex: func() -> complex
+
+record color {
+  r: float32,
+  g: float32,
+  b: float32,
+}
+
+record complex {
+  name: string,
+  colors: list<color>,
+  my: list<my-enum>,
+  mys: list<my-enum>,
+}
+
+enum my-enum {
+  one,
+  two,
+  three,
+}
