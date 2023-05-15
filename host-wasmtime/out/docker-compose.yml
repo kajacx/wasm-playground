@@ -1,0 +1,11 @@
+version: "3.7"
+
+services:
+  bevy-test-wasmtime:
+    image: nginx:latest
+    container_name: bevy-test-wasmtime
+    ports:
+      - "8090:80"
+    volumes:
+      - .:/usr/share/nginx/html
+    restart: unless-stopped
