@@ -9,7 +9,7 @@ use wai_bindgen_wasmer::wasmer::*;
 use wasm_bindgen::prelude::*;
 
 const PLUGIN_BYTES: &'static [u8] =
-    include_bytes!("../../plugin/target/wasm32-unknown-unknown/debug/bevy_plugin.wasm");
+    include_bytes!("../../plugin/target/wasm32-unknown-unknown/release/bevy_plugin.wasm");
 
 // wai_bindgen_wasmer::import!("../protocol-plugin.wai");
 
@@ -179,8 +179,12 @@ pub mod protocol_plugin {
             imports: &mut wasmer::Imports,
         ) -> anyhow::Result<(Self, wasmer::Instance)> {
             let env = Self::add_to_imports(&mut store, imports);
-            let instance = wasmer::Instance::new(&mut store, module, &*imports)?;
-            Ok((Self::new(store, &instance, env)?, instance))
+            let instance =
+                wasmer::Instance::new(&mut store, module, &*imports).expect("instance new");
+            Ok((
+                Self::new(store, &instance, env).expect("Self new"),
+                instance,
+            ))
         }
         /// Low-level creation wrapper for wrapping up the exports
         /// of the `instance` provided in this structure of wasm
@@ -194,15 +198,35 @@ pub mod protocol_plugin {
             _instance: &wasmer::Instance,
             env: wasmer::FunctionEnv<ProtocolPluginData>,
         ) -> Result<Self, wasmer::ExportError> {
-            let func_add_three = _instance.exports.get_typed_function(&store, "add-three")?;
+            let func_add_three = _instance
+                .exports
+                .get_function("add-three")
+                .expect("GET IT")
+                // .typed::<i32, i32>(&store)
+                .typed(&store)
+                .unwrap_or_else(|e| panic!("{e:?}"));
+            panic!("PLS {:?}", _instance.exports.get_function("add-three"));
+            // let func_add_three_ = _instance
+            //     .exports
+            //     .get_typed_function(&store, "add-three")
+            //     .expect("get add three |HOW?");
             let func_canonical_abi_free = _instance
                 .exports
-                .get_typed_function(&store, "canonical_abi_free")?;
-            let func_get_color = _instance.exports.get_typed_function(&store, "get-color")?;
+                .get_typed_function(&store, "canonical_abi_free")
+                .expect("get canonical abi free");
+            let func_get_color = _instance
+                .exports
+                .get_typed_function(&store, "get-color")
+                .expect("get get color");
             let func_get_complex = _instance
                 .exports
-                .get_typed_function(&store, "get-complex")?;
-            let memory = _instance.exports.get_memory("memory")?.clone();
+                .get_typed_function(&store, "get-complex")
+                .expect("get get complex");
+            let memory = _instance
+                .exports
+                .get_memory("memory")
+                .expect("get memory")
+                .clone();
             Ok(ProtocolPlugin {
                 func_add_three,
                 func_canonical_abi_free,
