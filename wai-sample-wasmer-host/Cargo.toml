@@ -6,5 +6,5 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-wai-bindgen-wasmer = { version = "0.2.4", features = ["sys"] }
-wasmer = { version = "=3.2.0-beta.1", features = ["cranelift"] }
+wai-bindgen-wasmer = { version = "0.4", features = ["sys"] }
+wasmer = { version = "3.3", features = ["cranelift"] }

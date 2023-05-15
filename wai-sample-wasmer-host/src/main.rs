@@ -22,6 +22,21 @@ impl sample_protocol_host::SampleProtocolHost for SampleProtocolPluginData {
     }
 }
 
+struct MyData {
+    number: u32,
+}
+
+impl sample_protocol_host::SampleProtocolHost for MyData {
+    fn add_one(&mut self, num: u32) -> u32 {
+        self.number = self.number + num;
+        self.number
+    }
+
+    fn move_y(&mut self, vec: sample_protocol_host::Vector3f) -> sample_protocol_host::Vector3f {
+        vec
+    }
+}
+
 fn main() {
     let compiler = Cranelift::default();
 
@@ -31,7 +46,8 @@ fn main() {
     let add_imports = sample_protocol_host::add_to_imports(
         &mut store,
         &mut imports,
-        SampleProtocolPluginData::default(),
+        // SampleProtocolPluginData::default(),
+        MyData { number: 5 },
     );
 
     let module = Module::new(&store, PLUGIN_BYTES).expect("should load module from bytes");
@@ -45,6 +61,7 @@ fn main() {
 
     add_imports(&instance, &store).expect("should add imports");
 
+    println!("{:?}", plugin.add_three(&mut store, 5));
     println!("{:?}", plugin.add_three(&mut store, 5));
 
     println!(
