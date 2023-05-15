@@ -1,0 +1,15 @@
+[package]
+name = "wasmer-usage"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+console_error_panic_hook = "0.1.7"
+wasm-bindgen = "0.2.84"
+# wasmer = { version = "3.1.1", default-features = false, features = ["js-default"] }
+# wasmer = { path = "../wasmer/lib/api", default-features = false, features = ["js-default"] }
+wasmer = { path = "../../wasmer/lib/api", default-features = false, features = ["js-default"] }
+wee_alloc = "0.4.5"
