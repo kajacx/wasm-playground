@@ -1,0 +1,36 @@
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="data:," />
+    <title>wasm only forked</title>
+    <base href="." />
+
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        width: 100vw;
+        height: 100vh;
+      }
+
+      canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <script type="module">
+      // import init from "./bevy-web-test.js";
+      // init("./bevy-web-test_bg.wasm");
+      // import * as wasm from "./wasm_only.js";
+      // wasm.greet();
+      import init from "./wasm_only.js";
+      let wasm = await init("./wasm_only_bg.wasm");
+      wasm.greet();
+      wasm.print_color();
+    </script>
+  </body>
+</html>
