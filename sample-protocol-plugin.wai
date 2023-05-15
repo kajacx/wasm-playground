@@ -1,0 +1,9 @@
+add-three: func(num: u32) -> u32
+
+move-vec: func(vec: vector3f) -> vector3f
+
+record vector3f {
+  x: float32,
+  y: float32,
+  z: float32,
+}
