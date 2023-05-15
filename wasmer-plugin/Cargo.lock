@@ -3,5 +3,5 @@
 version = 3
 
 [[package]]
-name = "wasmer2-plugin"
+name = "wasmer-plugin"
 version = "0.1.0"

@@ -1,5 +1,5 @@
 [package]
-name = "wasmer2-plugin"
+name = "wasmer-plugin"
 version = "0.1.0"
 edition = "2021"
 
