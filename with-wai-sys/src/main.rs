@@ -1,4 +1,4 @@
-use wasmer::*;
+use wai_bindgen_wasmer::wasmer::*;
 
 const PLUGIN_BYTES: &'static [u8] =
     include_bytes!("../../plugin/target/wasm32-unknown-unknown/release/bevy_plugin.wasm");
