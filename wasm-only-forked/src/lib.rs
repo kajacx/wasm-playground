@@ -7,7 +7,7 @@ use wai_bindgen_wasmer::wasmer::*;
 use wasm_bindgen::prelude::*;
 
 const PLUGIN_BYTES: &'static [u8] =
-    include_bytes!("../../plugin/target/wasm32-unknown-unknown/debug/bevy_plugin.wasm");
+    include_bytes!("../../plugin/target/wasm32-unknown-unknown/release/bevy_plugin.wasm");
 
 // wai_bindgen_wasmer::import!("../protocol-plugin.wai");
 
