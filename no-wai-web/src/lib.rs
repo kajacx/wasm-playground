@@ -16,7 +16,7 @@ const PLUGIN_BYTES: &'static [u8] =
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen]
-pub fn add_three(number: u32) -> u32 {
+pub fn add_three(number: i32) -> i32 {
     console_error_panic_hook::set_once();
 
     let (mut store, module) = create_store();
@@ -26,14 +26,14 @@ pub fn add_three(number: u32) -> u32 {
 
     let add_three = instance
         .exports
-        .get_function("add-three")
+        .get_function("add_three")
         .expect("should get function")
         .typed::<i32, i32>(&store)
         .expect("should cast to typed");
 
     add_three
-        .call(&mut store, number as _)
-        .expect("should add three") as _
+        .call(&mut store, number)
+        .expect("should add three")
 }
 
 fn create_store() -> (Store, Module) {
