@@ -1,0 +1,8 @@
+[package]
+name = "no-wai-sys"
+version = "0.1.0"
+authors = ["kajacx <kajacx@gmail.com>"]
+edition = "2021"
+
+[dependencies]
+wasmer = { version = "=3.3.0" }
