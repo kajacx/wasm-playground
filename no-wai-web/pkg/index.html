@@ -27,10 +27,10 @@
       // init("./bevy-web-test_bg.wasm");
       // import * as wasm from "./wasm_only.js";
       // wasm.greet();
-      import init from "./wasm_only.js";
-      let wasm = await init("./wasm_only_bg.wasm");
+      import init from "./no_wai_web.js";
+      let wasm = await init("./no_wai_web_bg.wasm");
       try {
-        wasm.print_eight();
+        alert(wasm.add_three(5));
       } catch (ex) {
         alert("ERROR: " + ex);
       }

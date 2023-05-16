@@ -23,10 +23,7 @@ console_error_panic_hook = { version = "0.1.6", optional = true }
 # compared to the default allocator's ~10K. It is slower than the default
 # allocator, however.
 wee_alloc = { version = "0.4.5", optional = true }
-wai-bindgen-wasmer = { version = "0.4", features = ["js"] }
-# wai-bindgen-wasmer = { version = "0.2.4", features = ["js"] }
-# wai-bindgen-wasmer = { path = "../wai/crates/wasmer", default-features = false, features = ["js"] }
-# wai-bindgen-wasmer = { path = "../../wai/crates/wasmer", default-features = false, features = ["js"] }
+wasmer = { version = "3.3", default-features = false, features = ["js-default"] }
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.13"
