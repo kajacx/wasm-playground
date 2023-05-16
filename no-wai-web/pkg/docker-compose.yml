@@ -5,7 +5,7 @@ services:
     image: nginx:latest
     container_name: wasm-only-forked
     ports:
-      - "8092:80"
+      - "8093:80"
     volumes:
       - .:/usr/share/nginx/html
     networks: []

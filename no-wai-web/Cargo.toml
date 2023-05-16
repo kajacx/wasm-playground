@@ -1,5 +1,5 @@
 [package]
-name = "wasm-only"
+name = "no-wai-web"
 version = "0.1.0"
 authors = ["kajacx <kajacx@gmail.com>"]
 edition = "2021"
