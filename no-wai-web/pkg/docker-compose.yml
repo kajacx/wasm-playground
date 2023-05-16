@@ -1,9 +1,9 @@
 version: "3.7"
 
 services:
-  wasm-only-forked:
+  no-wai-web:
     image: nginx:latest
-    container_name: wasm-only-forked
+    container_name: no-wai-web
     ports:
       - "8093:80"
     volumes:

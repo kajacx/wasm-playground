@@ -17,6 +17,8 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen]
 pub fn add_three(number: u32) -> u32 {
+    console_error_panic_hook::set_once();
+
     let (mut store, module) = create_store();
 
     let instance =
