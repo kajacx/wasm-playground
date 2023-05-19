@@ -31,6 +31,7 @@
       let wasm = await init("./wasm_only_bg.wasm");
       try {
         alert(wasm.return_eight());
+        alert(wasm.return_color());
       } catch (ex) {
         alert("ERROR: " + ex);
       }
