@@ -30,7 +30,7 @@
       import init from "./wasm_only.js";
       let wasm = await init("./wasm_only_bg.wasm");
       try {
-        alert(wasm.add_three(55));
+        alert(wasm.return_eight());
       } catch (ex) {
         alert("ERROR: " + ex);
       }
