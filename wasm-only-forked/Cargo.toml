@@ -23,7 +23,9 @@ console_error_panic_hook = { version = "0.1.6", optional = true }
 # compared to the default allocator's ~10K. It is slower than the default
 # allocator, however.
 wee_alloc = { version = "0.4.5", optional = true }
-wai-bindgen-wasmer = { version = "=0.4", features = ["js"] }
+# wai-bindgen-wasmer = { git = "https://github.com/wasmerio/wasmer.git", features = ["js"] }
+# wai-bindgen-wasmer = { version = "=0.4", features = ["js"] }
+wai-bindgen-wasmer = { path = "../../../wasmer/lib/wai-bindgen-wasmer", features = ["js"] }
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.13"
