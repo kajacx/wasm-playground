@@ -1,7 +1,3 @@
-add-three: func(number: u32) -> u32
-
-get-color: func() -> color
-
 pass-color-list: func(colors: list<color>) -> list<color>
 
 record color {

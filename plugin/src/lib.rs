@@ -14,6 +14,10 @@ impl protocol_plugin::ProtocolPlugin for ProtocolPlugin {
             b: 0.0,
         }
     }
+
+    fn pass_color_list(colors: Vec<protocol_plugin::Color>) -> Vec<protocol_plugin::Color> {
+        colors
+    }
 }
 
 // #[no_mangle]

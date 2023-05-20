@@ -3,13 +3,14 @@
 #![feature(no_coverage)]
 #![feature(derive_clone_copy)]
 
-use wai_bindgen_wasmer::wasmer::*;
+use wai_bindgen_wasmer::{wasmer::*, Le};
 use wasm_bindgen::prelude::*;
 
 const PLUGIN_BYTES: &'static [u8] =
     include_bytes!("../../plugin/target/wasm32-unknown-unknown/release/bevy_plugin.wasm");
 
 wai_bindgen_wasmer::import!("../protocol-plugin.wai");
+wai_bindgen_wasmer::export!("../protocol-host.wai");
 
 // #[allow(clippy::all)]
 // pub mod protocol_plugin {
@@ -107,6 +108,17 @@ wai_bindgen_wasmer::import!("../protocol-plugin.wai");
 #[cfg(feature = "wee_alloc")]
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+
+struct MyData;
+
+impl protocol_host::ProtocolHost for MyData {
+    fn pass_color_list(
+        &mut self,
+        colors: &[Le<protocol_host::Color>],
+    ) -> Vec<protocol_host::Color> {
+        panic!()
+    }
+}
 
 #[wasm_bindgen]
 pub fn return_eight() -> i32 {
