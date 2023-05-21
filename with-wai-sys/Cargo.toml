@@ -6,6 +6,6 @@ edition = "2021"
 
 [dependencies]
 # wasmer = { version = "=3.3.0" }
-# wai-bindgen-wasmer = { version = "=0.4.0", features = ["sys"]}
-wai-bindgen-wasmer = { path = "../../../wasmer/lib/wai-bindgen-wasmer", features = ["cranelift"]}
-# wasmer = {version = "=3.3.0", features = ["cranelift"]}
+wai-bindgen-wasmer = { version = "=0.4.0", features = ["sys"]}
+# wai-bindgen-wasmer = { path = "../../../wasmer/lib/wai-bindgen-wasmer", features = ["cranelift"]}
+wasmer = {version = "=3.3.0", features = ["cranelift"]}

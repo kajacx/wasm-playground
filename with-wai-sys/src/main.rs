@@ -1,5 +1,8 @@
 use wai_bindgen_wasmer::wasmer::*;
 
+wai_bindgen_wasmer::import!("../protocol-plugin.wai");
+wai_bindgen_wasmer::export!("../protocol-host.wai"); // This throws the error
+
 const PLUGIN_BYTES: &'static [u8] =
     include_bytes!("../../plugin/target/wasm32-unknown-unknown/release/bevy_plugin.wasm");
 
