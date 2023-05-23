@@ -16,4 +16,4 @@ wasmer = { git = "https://github.com/wasmerio/wasmer.git", default-features = fa
 
 [features]
 sys = ["wasmer/sys-default"]
-js = ["wasmer/js-default"]
+js = ["wasmer/js-default", "wasm-bindgen"]

@@ -5,7 +5,7 @@ cargo build --target=wasm32-unknown-unknown && \
 cd .. && \
 \
 cd wasmer3-runtime && \
-wasm-pack build --features js --target web && \
+wasm-pack build --target web -- --features js && \
 cp pkg/pkg.gitignore pkg/.gitignore && \
 # wasm-bindgen --out-dir ./out/ --target web ./target/wasm32-unknown-unknown/debug/bevy-web-test.wasm && \
 cd pkg && docker-compose -p wasmer3-web down && docker-compose -p wasmer3-web up -d && cd .. && \
