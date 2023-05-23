@@ -1,3 +1,4 @@
+#[cfg(feature = "js")]
 use wasm_bindgen::prelude::*;
 use wasmer::*;
 
@@ -8,11 +9,6 @@ struct Env {
 
 unsafe impl Send for Env {}
 unsafe impl Sync for Env {}
-
-#[wasm_bindgen]
-extern "C" {
-    fn alert(s: &str);
-}
 
 fn main() -> Result<u32, Box<dyn std::error::Error>> {
     let wasm_bytes = include_bytes!(
@@ -95,7 +91,7 @@ fn main() -> Result<u32, Box<dyn std::error::Error>> {
     Ok(compare_string.len() as u32)
 }
 
-#[wasm_bindgen]
+#[cfg_attr(feature = "js", wasm_bindgen)]
 pub fn run_main() -> u32 {
     console_error_panic_hook::set_once();
     main().expect("should run main")
