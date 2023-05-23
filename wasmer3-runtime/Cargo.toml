@@ -8,8 +8,12 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 console_error_panic_hook = "0.1.7"
-wasm-bindgen = "0.2.84"
+wasm-bindgen = {version = "0.2.84", optional = true }
 # wasmer = { version = "3.1.1", default-features = false, features = ["js-default"] }
 # wasmer = { path = "../wasmer/lib/api", default-features = false, features = ["js-default"] }
-wasmer = { path = "../../wasmer/lib/api", default-features = false, features = ["js-default"] }
-wee_alloc = "0.4.5"
+# wasmer = { path = "../../wasmer/lib/api", default-features = false, features = ["js-default"] }
+wasmer = { git = "https://github.com/wasmerio/wasmer.git", default-features = false }
+
+[features]
+sys = ["wasmer/sys-default"]
+js = ["wasmer/js-default"]

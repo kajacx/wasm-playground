@@ -1,0 +1,14 @@
+version: "3.7"
+
+services:
+  wasmer3-manual:
+    image: nginx:latest
+    container_name: wasmer3-manual
+    ports:
+      - "8093:80"
+    volumes:
+      - .:/usr/share/nginx/html
+    networks: []
+    restart: unless-stopped
+
+networks: {}
