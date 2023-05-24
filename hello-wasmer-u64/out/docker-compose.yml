@@ -1,0 +1,14 @@
+version: "3.7"
+
+services:
+  wasmer-u64:
+    image: nginx:latest
+    container_name: wasmer-u64
+    ports:
+      - "8094:80"
+    volumes:
+      - .:/usr/share/nginx/html
+    networks: []
+    restart: unless-stopped
+
+networks: {}

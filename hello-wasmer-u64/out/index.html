@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <title>Wasmer u64 example</title>
+    <base href="." />
+  </head>
+  <body>
+    <script type="module">
+      import init, { test_add_three_i64 } from "/hello_wasmer_u64.js";
+
+      init().then(() => {
+        try {
+          test_add_three_i64();
+          alert("SUCCESS");
+        } catch (ex) {
+          alert("ERROR");
+        }
+      });
+    </script>
+  </body>
+</html>
