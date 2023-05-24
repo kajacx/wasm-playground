@@ -14,7 +14,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let module = Module::new(&store, wasm_bytes)?;
 
     // Create an empty import object.
-    let import_object = imports! {};
+    let import_object = imports! {
+        "my_imports" => {
+            "add_one_i32" => Function::new_typed(&mut store, |arg: i32| arg + 1),
+        }
+    };
 
     println!("Instantiating module...");
     // Let's instantiate the Wasm module.
