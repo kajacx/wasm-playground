@@ -7,9 +7,9 @@ const PLUGIN_BYTES: &'static [u8] =
 wai_bindgen_wasmer::import!("../protocol-plugin.wai");
 
 fn main() {
-    // let plugin_color = get_color();
-    // let bevy_color = Color::rgb(plugin_color.r, plugin_color.g, plugin_color.b);
-    let bevy_color = Color::rgb(0.2, 0.5, 0.9);
+    let plugin_color = get_color();
+    let bevy_color = Color::rgb(plugin_color.r, plugin_color.g, plugin_color.b);
+    // let bevy_color = Color::rgb(0.2, 0.5, 0.9);
 
     App::new()
         .add_plugins(DefaultPlugins)
