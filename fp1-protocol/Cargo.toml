@@ -6,4 +6,4 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-fp-bindgen = { path = "../fp-bindgen/fp-bindgen", features = ["generators"] }
+fp-bindgen = { version = "3.0.0", features = ["generators"] }

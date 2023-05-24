@@ -6,8 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-fp-bindgen-support = { path = "../fp-bindgen/fp-bindgen-support", features = ["host", "async"] }
-wasmer = { version = "3.1", features = ["singlepass"] }
+fp-bindgen-support = { version = "3.0", features = ["async", "wasmer2_host"] }
+wasmer = { version = "2.3", features = ["singlepass"] }
 serde = { version = "1.0", features = ["derive"] }
-tokio = { version = "1.25.0", features = ["full"] }
-futures = "0.3.26"
+tokio = { version = "1.28", features = ["full"] }
+futures = "0.3.28"

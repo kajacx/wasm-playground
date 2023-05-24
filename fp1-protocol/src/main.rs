@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeSet;
 
 use fp_bindgen::{prelude::*, types::CargoDependency};
 use types::Vector2f;
@@ -26,26 +26,24 @@ fp_export! {
 }
 
 fn main() {
-    let dependency = CargoDependency {
-        features: BTreeSet::from(["async", "guest"]),
-        path: Some("../../../fp-bindgen/fp-bindgen-support"),
-        ..Default::default()
-    };
+    let dependency =
+        CargoDependency::with_version_and_features("3.0", BTreeSet::from(["async", "guest"]));
 
-    // For plugin
     fp_bindgen!(BindingConfig {
-        bindings_type: BindingsType::RustPlugin(RustPluginConfig {
-            name: "fp-protocol",
-            authors: "[\"kajacx\"]",
-            version: "0.1.0",
-            dependencies: BTreeMap::from([("fp-bindgen-support", dependency)]),
-        }),
+        bindings_type: BindingsType::RustPlugin(
+            RustPluginConfig::builder()
+                .name("fp-protocol")
+                .author("kajacx")
+                .version("0.1.0")
+                .dependency("fp-bindgen-support", dependency)
+                .build()
+        ),
         path: "bindings/rust-plugin",
     });
 
     // For runtime
     fp_bindgen!(BindingConfig {
-        bindings_type: BindingsType::RustWasmerRuntime,
+        bindings_type: BindingsType::RustWasmer2Runtime,
         path: "bindings/rust-wasmer-runtime",
     });
 }
