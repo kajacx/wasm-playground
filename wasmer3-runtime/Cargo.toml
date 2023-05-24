@@ -6,4 +6,4 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-wasmer = { version = "3.1.1", features = ["compiler", "cranelift", "singlepass"] }
+wasmer = { version = "3.3" }
