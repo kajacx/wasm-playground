@@ -1,0 +1,1 @@
+get-red: func() -> float32
