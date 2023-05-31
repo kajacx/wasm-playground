@@ -17,8 +17,7 @@ impl AddressBook {
 }
 
 struct Env {
-    // address_book: Arc<Mutex<AddressBook>>,
-    address_book: AddressBook,
+    address_book: Arc<Mutex<AddressBook>>,
     memory: Arc<Mutex<Option<Memory>>>,
 }
 
@@ -34,18 +33,19 @@ fn main() {
     // Let's compile the Wasm module.
     let module = Module::new(&store, wasm_bytes).expect("should instantiate module");
 
-    // let address_book = Arc::new(Mutex::new(AddressBook(HashMap::new())));
     let mut address_book = AddressBook(HashMap::new());
     address_book.0.insert("account1".into(), 11.0);
     address_book.0.insert("account2".into(), 12.0);
     address_book.0.insert("account3".into(), 13.0);
+
+    let address_book = Arc::new(Mutex::new(address_book));
 
     let memory_cell = Arc::new(Mutex::new(None));
 
     let env = FunctionEnv::new(
         &mut store,
         Env {
-            address_book,
+            address_book: address_book.clone(),
             memory: memory_cell.clone(),
         },
     );
@@ -77,7 +77,7 @@ fn main() {
                 let address_book = &data.address_book;
 
                 // Actual user code
-                address_book.get_balance(customer_address)
+                address_book.try_lock().expect("should lock address_book").get_balance(customer_address)
             })
         }
     };
@@ -102,6 +102,16 @@ fn main() {
 
     // And call it!
     let amount = do_accounting.call(&mut store).expect("should get amount");
-
     println!("Calculated amount: {amount}");
+
+    // We can even edit the address book now
+    address_book
+        .try_lock()
+        .expect("should lock")
+        .0
+        .insert("account1".into(), 111.0);
+
+    // And then call the exported method again
+    let amount = do_accounting.call(&mut store).expect("should get amount");
+    println!("Calculated amount again: {amount}");
 }
