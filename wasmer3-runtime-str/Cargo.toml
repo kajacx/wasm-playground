@@ -1,0 +1,7 @@
+[package]
+name = "wasmer-usage"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+wasmer = { version = "3.3" }
