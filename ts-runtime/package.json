@@ -1,0 +1,15 @@
+{
+  "name": "ts-runtime",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/kajacx/wasm-playground",
+  "author": "kajacx",
+  "license": "MIT",
+  "scripts": {
+    "start": "tsc && node dist/index.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.2.5",
+    "typescript": "^5.1.3"
+  }
+}
