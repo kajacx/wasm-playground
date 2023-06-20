@@ -18,5 +18,14 @@ fn main() -> Result<(), Box<dyn Error>> {
     let returned = add_i32.call(&mut store, (5, 10))?;
     assert_eq!(returned, 5 + 10);
 
+    // Multiple results
+    let add_sub_ten_i32 =
+        instance.get_typed_func::<i32, (i32, i32)>(&mut store, "add_sub_ten_i32")?;
+
+    let res = add_sub_ten_i32.call(&mut store, 50)?;
+    println!("RES: {:?}", res);
+    // assert_eq!(a, 50 + 10);
+    // assert_eq!(b, 50 - 10);
+
     Ok(())
 }
