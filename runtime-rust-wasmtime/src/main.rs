@@ -24,8 +24,11 @@ fn main() -> Result<(), Box<dyn Error>> {
     let engine = Engine::new(&config)?;
     let mut store = Store::new(&engine, State::default());
 
-    let bytes = std::fs::read("../plugin-rust/target/wasm32-wasi/debug/plugin_rust.wasm")?;
-    let adapter_bytes = std::fs::read("./wasi_snapshot_preview1.wasm")?;
+    let bytes =
+        // std::fs::read("../plugin-rust/target/wasm32-wasi/debug/plugin_rust.wasm").expect("bytres");
+        std::fs::read("../plugin-rust/target/wasm32-unknown-unknown/debug/plugin_rust.wasm").expect("bytres");
+    let adapter_bytes =
+        std::fs::read("../plugin-rust/wasi_snapshot_preview1.wasm").expect("adapter");
 
     let component_bytes = ComponentEncoder::default()
         .module(&bytes)?
@@ -33,7 +36,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         .adapter("wasm_to_component", &adapter_bytes)?
         .encode()?;
 
-    let component = Component::new(&store.engine(), &component_bytes)?;
+    let component = Component::new(&store.engine(), &component_bytes).expect("create component");
 
     let mut linker = Linker::new(store.engine());
 
