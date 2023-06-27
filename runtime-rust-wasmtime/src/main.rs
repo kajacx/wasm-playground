@@ -1,5 +1,9 @@
 use std::error::Error;
-use wasmtime::component::*;
+use wasmtime::{
+    component::{Component, Linker},
+    Config, Engine, Store,
+};
+use wit_component::ComponentEncoder;
 
 wasmtime::component::bindgen!("my-world");
 
@@ -14,10 +18,22 @@ impl MyWorldImports for State {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let mut store = wasmtime::Store::<State>::default();
+    let mut config = Config::new();
+    config.wasm_component_model(true);
+
+    let engine = Engine::new(&config)?;
+    let mut store = Store::new(&engine, State::default());
 
     let bytes = std::fs::read("../plugin-rust/target/wasm32-wasi/debug/plugin_rust.wasm")?;
-    let component = Component::new(&store.engine(), &bytes)?;
+    let adapter_bytes = std::fs::read("./wasi_snapshot_preview1.wasm")?;
+
+    let component_bytes = ComponentEncoder::default()
+        .module(&bytes)?
+        .validate(true)
+        .adapter("wasm_to_component", &adapter_bytes)?
+        .encode()?;
+
+    let component = Component::new(&store.engine(), &component_bytes)?;
 
     let mut linker = Linker::new(store.engine());
 
