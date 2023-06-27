@@ -16,7 +16,8 @@ impl MyWorldImports for State {
 fn main() -> Result<(), Box<dyn Error>> {
     let mut store = wasmtime::Store::<State>::default();
 
-    let component = Component::new(&store.engine(), &[])?;
+    let bytes = std::fs::read("../plugin-rust/target/wasm32-wasi/debug/plugin_rust.wasm")?;
+    let component = Component::new(&store.engine(), &bytes)?;
 
     let mut linker = Linker::new(store.engine());
 
