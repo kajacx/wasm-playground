@@ -1,6 +1,6 @@
 package example:protocol
 
-world my_world {
+world my-world {
   import print: func(msg: string)
 
   export run: func()
