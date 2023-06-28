@@ -7,8 +7,15 @@
   </head>
   <body>
     <script type="module">
-      import { run } from "./out-dir/component.js";
-      run();
+      import { instantiate } from "./out-dir/component.js";
+      instantiate(
+        async (url, imports) => {
+          console.log("URL:::", url, imports);
+          let data = await fetch("out-dir/" + url);
+          return WebAssembly.compile(await data.arrayBuffer(), imports);
+        },
+        { default: console.log }
+      ).then((instance) => instance.run());
     </script>
   </body>
 </html>

@@ -1,6 +1,6 @@
 wit_bindgen::generate!({
     path: "../protocol.wit",
-    world: "my-world"
+    world: "my-world",
 });
 
 struct Plugin;
