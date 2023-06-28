@@ -3,9 +3,11 @@ use wasmtime::{
     component::{Component, Linker},
     Config, Engine, Store,
 };
-use wit_component::ComponentEncoder;
 
-wasmtime::component::bindgen!("my-world");
+wasmtime::component::bindgen!({
+    path: "../protocol.wit",
+    world: "my-world"
+});
 
 #[derive(Debug, Default, Clone)]
 struct State {}
