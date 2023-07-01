@@ -49,19 +49,20 @@ async fn compute_it() -> String {
 
     run.call0(&instance).expect("should call run");
 
-    // let point = Point { x: 10, y: 10 };
-    // let point: JsValue = point.into();
-    let point: JsValue = Object::new().into();
-    Reflect::set(&point, &"x".into(), &20.into()).expect("set x");
-    Reflect::set(&point, &"y".into(), &20.into()).expect("set y");
-
-    let move_point = Reflect::get(&instance, &"movePoint".into()).expect("get move point");
-    let mm = move_point.clone();
-    let move_point: Function = move_point.try_into().expect("get move point as fn");
-
     let console = js_sys::eval("console").unwrap();
     let log = Reflect::get(&console, &"log".into()).expect("get log");
     let log: Function = log.try_into().expect("get log as fn");
+
+    let point = Point { x: 10, y: 10 };
+    let point: JsValue = point.into();
+    // let point: JsValue = Object::new().into();
+    // Reflect::set(&point, &"x".into(), &20.into()).expect("set x");
+    // Reflect::set(&point, &"y".into(), &20.into()).expect("set y");
+    log.call2(&console, &"HELLO POINT".into(), &point).unwrap();
+
+    let move_point = Reflect::get(&instance, &"movePoint".into()).expect("get move point");
+    // let mm = move_point.clone();
+    let move_point: Function = move_point.try_into().expect("get move point as fn");
 
     log.call2(&console, &"HELLO CONSOLE".into(), &instance)
         .unwrap();
