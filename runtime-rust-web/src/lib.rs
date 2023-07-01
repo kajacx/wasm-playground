@@ -1,3 +1,5 @@
+use std::sync::{Arc, Mutex};
+
 use js_sys::{Function, Reflect};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::JsFuture;
@@ -9,10 +11,7 @@ pub async fn compute() -> String {
 }
 
 async fn compute_it() -> String {
-    // let window = web_sys::window().unwrap();
-
-    // let import = Reflect::get(&window.into(), &"import".into()).expect("get import");
-    // panic!("IMPORT IS: {import:?}");
+    let text = Arc::new(Mutex::new(String::new()));
 
     let imported = js_sys::eval("import('/out-dir/component.js')").expect("eval import");
     let imported = await_js_value(imported).await;
@@ -28,9 +27,14 @@ async fn compute_it() -> String {
     )
     .expect("eval compile core");
 
+    let text_clone = text.clone();
+    let print = Closure::<dyn Fn(String)>::new(move |value: String| {
+        text_clone.try_lock().unwrap().push_str(&value);
+    });
+
     let import_object: JsValue = js_sys::Object::new().into();
-    let log = js_sys::eval("(val) => console.log('VALUE IS:', val)").expect("eval log");
-    Reflect::set(&import_object, &"default".into(), &log).unwrap();
+    // let log = js_sys::eval("(val) => console.log('VALUE IS:', val)").expect("eval log");
+    Reflect::set(&import_object, &"default".into(), &print.as_ref().into()).unwrap();
 
     let instance = instantiate
         .call2(&imported, &compile_core, &import_object)
@@ -44,7 +48,10 @@ async fn compute_it() -> String {
 
     // panic!("INSTANCE IS what?: {instance:?}");
 
-    "ffooo".into()
+    drop(print);
+
+    let text = text.try_lock().unwrap();
+    text.clone()
 }
 
 async fn await_js_value(value: JsValue) -> JsValue {
