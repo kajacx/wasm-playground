@@ -13,25 +13,28 @@
       //   .then(console.log)
       //   .catch(console.error);
 
-      if (Math.random() < 2) {
-        import("./out-dir/component.js")
-          //  .then((resp) => resp.text())
-          //  .then(eval)
-          .then(console.log)
-          .catch(console.error);
-      }
+      // if (Math.random() < 2) {
+      //   import("./out-dir/component.js")
+      //     //  .then((resp) => resp.text())
+      //     //  .then(eval)
+      //     .then(console.log)
+      //     .catch(console.error);
+      // }
 
-      import { instantiate } from "./out-dir/component.js";
-      instantiate(
-        async (url, imports) => {
-          console.log("URL:::", url, imports);
-          let data = await fetch("out-dir/" + url);
-          return WebAssembly.compile(await data.arrayBuffer(), imports);
-        },
-        { default: console.log }
-      ).then((instance) => {
-        instance.run();
-        console.log(instance.movePoint({ x: 5, y: 5 }));
+      import("./out-dir/component.js").then((module) => {
+        module
+          .instantiate(
+            async (url, imports) => {
+              let data = await fetch("out-dir/" + url);
+              return WebAssembly.compile(await data.arrayBuffer(), imports);
+            },
+            { default: console.log }
+          )
+          .then((instance) => {
+            // alert(Reflect.get(instance, "movePoint"));
+            instance.run();
+            console.log(instance.movePoint({ x: 5, y: 15 }));
+          });
       });
     </script>
   </body>

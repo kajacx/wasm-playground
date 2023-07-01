@@ -56,7 +56,18 @@ async fn compute_it() -> String {
     Reflect::set(&point, &"y".into(), &20.into()).expect("set y");
 
     let move_point = Reflect::get(&instance, &"movePoint".into()).expect("get move point");
+    let mm = move_point.clone();
     let move_point: Function = move_point.try_into().expect("get move point as fn");
+
+    let console = js_sys::eval("console").unwrap();
+    let log = Reflect::get(&console, &"log".into()).expect("get log");
+    let log: Function = log.try_into().expect("get log as fn");
+
+    log.call2(&console, &"HELLO CONSOLE".into(), &instance)
+        .unwrap();
+
+    //web_sys::window().unwrap().alert();
+    // panic!("WHAT IS IT then? {mm:?}, {move_point:?}");
 
     let point = move_point
         .call1(&instance, &point)
