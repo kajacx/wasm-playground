@@ -30,14 +30,19 @@ async fn compute_it() -> String {
 
     let import_object: JsValue = js_sys::Object::new().into();
     let log = js_sys::eval("(val) => console.log('VALUE IS:', val)").expect("eval log");
-    Reflect::set(&import_object, &"print".into(), &log).unwrap();
+    Reflect::set(&import_object, &"default".into(), &log).unwrap();
 
     let instance = instantiate
         .call2(&imported, &compile_core, &import_object)
         .expect("call instantiate");
     let instance = await_js_value(instance).await;
 
-    panic!("INSTANCE IS what?: {instance:?}");
+    let run = Reflect::get(&instance, &"run".into()).expect("get run");
+    let run: Function = run.try_into().expect("get run as fn");
+
+    run.call0(&instance).expect("should call run");
+
+    // panic!("INSTANCE IS what?: {instance:?}");
 
     "ffooo".into()
 }
