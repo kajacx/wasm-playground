@@ -1,0 +1,14 @@
+version: "3.7"
+
+services:
+  rust-web-jco:
+    image: nginx:latest
+    container_name: rust-web-jco
+    ports:
+      - "8096:80"
+    volumes:
+      - .:/usr/share/nginx/html
+    networks: []
+    restart: unless-stopped
+
+networks: {}

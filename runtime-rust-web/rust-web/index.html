@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <title>Rust web runtime</title>
+    <base href="." />
+  </head>
+  <body>
+    <script type="module">
+      import init from "./pkg/runtime_rust_web.js";
+      let wasm = await init();
+      console.log("Result: ", wasm.compute());
+    </script>
+  </body>
+</html>
