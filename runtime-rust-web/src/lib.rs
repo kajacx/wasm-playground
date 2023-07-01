@@ -35,9 +35,21 @@ async fn compute_it() -> String {
         text_clone.try_lock().unwrap().push_str(&value);
     });
 
+    let point_import = Closure::<dyn Fn(Point) -> Point>::new(|mut point: Point| {
+        point.x += 100;
+        point.y += 1000;
+        point
+    });
+
     let import_object: JsValue = js_sys::Object::new().into();
     // let log = js_sys::eval("(val) => console.log('VALUE IS:', val)").expect("eval log");
     Reflect::set(&import_object, &"default".into(), &print.as_ref().into()).unwrap();
+    Reflect::set(
+        &import_object,
+        &"default".into(),
+        &point_import.as_ref().into(),
+    )
+    .unwrap();
 
     let instance = instantiate
         .call2(&imported, &compile_core, &import_object)

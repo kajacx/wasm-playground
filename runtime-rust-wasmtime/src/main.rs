@@ -17,6 +17,11 @@ impl MyWorldImports for State {
         println!("Printing in host: {msg}");
         Ok(())
     }
+
+    fn import_point(&mut self, mut point: Point) -> wasmtime::Result<Point> {
+        point.x -= 100;
+        Ok(point)
+    }
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -50,6 +55,11 @@ fn main() -> Result<(), Box<dyn Error>> {
     let (my_world, _instance) = MyWorld::instantiate(&mut store, &component, &linker)?;
 
     my_world.call_run(&mut store)?;
+
+    println!(
+        "Point: {:?}",
+        my_world.call_move_point(&mut store, Point { x: 5, y: 5 })
+    );
 
     Ok(())
 }
