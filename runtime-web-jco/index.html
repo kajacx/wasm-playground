@@ -7,6 +7,20 @@
   </head>
   <body>
     <script type="module">
+      // fetch("./out-dir/component.js")
+      //   .then((resp) => resp.text())
+      //   .then(eval)
+      //   .then(console.log)
+      //   .catch(console.error);
+
+      if (Math.random() < 2) {
+        import("./out-dir/component.js")
+          //  .then((resp) => resp.text())
+          //  .then(eval)
+          .then(console.log)
+          .catch(console.error);
+      }
+
       import { instantiate } from "./out-dir/component.js";
       instantiate(
         async (url, imports) => {
