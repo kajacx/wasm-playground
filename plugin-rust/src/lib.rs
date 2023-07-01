@@ -10,6 +10,12 @@ impl MyWorld for Plugin {
         print("Hello, world!");
         print("Hello, again!");
     }
+
+    fn move_point(mut point: Point) -> Point {
+        point.x += 1;
+        point.y -= 2;
+        point
+    }
 }
 
 export_my_world!(Plugin);

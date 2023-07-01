@@ -29,7 +29,10 @@
           return WebAssembly.compile(await data.arrayBuffer(), imports);
         },
         { default: console.log }
-      ).then((instance) => instance.run());
+      ).then((instance) => {
+        instance.run();
+        console.log(instance.movePoint({ x: 5, y: 5 }));
+      });
     </script>
   </body>
 </html>
