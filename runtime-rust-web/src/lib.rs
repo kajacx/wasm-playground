@@ -1,6 +1,9 @@
-use std::sync::{Arc, Mutex};
+use std::{
+    cell::Ref,
+    sync::{Arc, Mutex},
+};
 
-use js_sys::{Function, Reflect};
+use js_sys::{Function, Object, Reflect};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::JsFuture;
 
@@ -46,15 +49,43 @@ async fn compute_it() -> String {
 
     run.call0(&instance).expect("should call run");
 
-    // panic!("INSTANCE IS what?: {instance:?}");
+    // let point = Point { x: 10, y: 10 };
+    // let point: JsValue = point.into();
+    let point: JsValue = Object::new().into();
+    Reflect::set(&point, &"x".into(), &20.into()).expect("set x");
+    Reflect::set(&point, &"y".into(), &20.into()).expect("set y");
+
+    let move_point = Reflect::get(&instance, &"movePoint".into()).expect("get move point");
+    let move_point: Function = move_point.try_into().expect("get move point as fn");
+
+    let point = move_point
+        .call1(&instance, &point)
+        .expect("pls call move point");
+    // let point: Point = point.try_into().expect("get point into");
+    let point = Point {
+        x: Reflect::get(&point, &"x".into())
+            .expect("get x")
+            .as_f64()
+            .expect("unwrap x") as _,
+        y: 0,
+    };
 
     drop(print);
 
     let text = text.try_lock().unwrap();
-    text.clone()
+    let text = text.clone();
+
+    format!("{text} AND {point:?}")
 }
 
 async fn await_js_value(value: JsValue) -> JsValue {
     let as_promise = js_sys::Promise::try_from(value).expect("value to promise");
     JsFuture::from(as_promise).await.expect("awaiting promise")
+}
+
+#[wasm_bindgen]
+#[derive(Debug)]
+struct Point {
+    x: i32,
+    y: i32,
 }
