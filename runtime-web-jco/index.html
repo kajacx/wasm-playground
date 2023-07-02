@@ -28,7 +28,13 @@
               let data = await fetch("out-dir/" + url);
               return WebAssembly.compile(await data.arrayBuffer(), imports);
             },
-            { default: console.log }
+            {
+              print: console.log,
+              importPoint: (point) => {
+                point.x += 500;
+                return point;
+              },
+            }
           )
           .then((instance) => {
             // alert(Reflect.get(instance, "movePoint"));
