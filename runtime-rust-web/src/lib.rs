@@ -35,18 +35,24 @@ async fn compute_it() -> String {
         text_clone.try_lock().unwrap().push_str(&value);
     });
 
-    let point_import = Closure::<dyn Fn(Point) -> Point>::new(|mut point: Point| {
-        point.x += 100;
-        point.y += 1000;
+    // let point_import = Closure::<dyn Fn(Point) -> Point>::new(|mut point: Point| {
+    //     point.x += 100;
+    //     point.y += 1000;
+    //     point
+    // });
+
+    let point_import = Closure::<dyn Fn(JsValue) -> JsValue>::new(|mut point: JsValue| {
+        // point.x += 100;
+        // point.y += 1000;
         point
     });
 
     let import_object: JsValue = js_sys::Object::new().into();
     // let log = js_sys::eval("(val) => console.log('VALUE IS:', val)").expect("eval log");
-    Reflect::set(&import_object, &"default".into(), &print.as_ref().into()).unwrap();
+    Reflect::set(&import_object, &"print".into(), &print.as_ref().into()).unwrap();
     Reflect::set(
         &import_object,
-        &"default".into(),
+        &"importPoint".into(),
         &point_import.as_ref().into(),
     )
     .unwrap();
@@ -65,18 +71,18 @@ async fn compute_it() -> String {
     let log = Reflect::get(&console, &"log".into()).expect("get log");
     let log: Function = log.try_into().expect("get log as fn");
 
-    let point = Point { x: 10, y: 10 };
-    let point: JsValue = point.into();
-    // let point: JsValue = Object::new().into();
-    // Reflect::set(&point, &"x".into(), &20.into()).expect("set x");
-    // Reflect::set(&point, &"y".into(), &20.into()).expect("set y");
+    // let point = Point { x: 10, y: 10 };
+    // let point: JsValue = point.into();
+    let point: JsValue = Object::new().into();
+    Reflect::set(&point, &"x".into(), &20.into()).expect("set x");
+    Reflect::set(&point, &"y".into(), &20.into()).expect("set y");
     log.call2(&console, &"HELLO POINT".into(), &point).unwrap();
 
     let move_point = Reflect::get(&instance, &"movePoint".into()).expect("get move point");
     // let mm = move_point.clone();
     let move_point: Function = move_point.try_into().expect("get move point as fn");
 
-    log.call2(&console, &"HELLO CONSOLE".into(), &instance)
+    log.call2(&console, &"HELLO INSTANCE".into(), &instance)
         .unwrap();
 
     //web_sys::window().unwrap().alert();
@@ -91,7 +97,10 @@ async fn compute_it() -> String {
             .expect("get x")
             .as_f64()
             .expect("unwrap x") as _,
-        y: 0,
+        y: Reflect::get(&point, &"y".into())
+            .expect("get y")
+            .as_f64()
+            .expect("unwrap y") as _,
     };
 
     drop(print);
