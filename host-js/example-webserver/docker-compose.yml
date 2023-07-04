@@ -1,0 +1,14 @@
+version: "3.7"
+
+services:
+  example-webserver:
+    image: nginx:latest
+    container_name: example-webserver
+    ports:
+      - "8097:80"
+    volumes:
+      - .:/usr/share/nginx/html
+    networks: []
+    restart: unless-stopped
+
+networks: {}

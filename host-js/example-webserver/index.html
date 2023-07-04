@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <title>Example web server</title>
+    <base href="." />
+  </head>
+  <body>
+    <script type="module">
+      import init, { calculate } from "./pkg/host_js.js";
+      let wasm = await init("./pkg/host_js_bg.wasm");
+
+      document.getElementById("calculate").onclick = () => {
+        let text = document.getElementById("number").value.trim();
+        let number = parseInt(text);
+        let result;
+        if (number && number.toString() == text) {
+          result = calculate(number);
+        } else {
+          result = `"${text}" is not a number, try again.`;
+        }
+        document.getElementById("result").innerText = result;
+      };
+    </script>
+    <input id="number">
+    <button id="calculate">Calculate</button>
+    <br>
+    <span id="result">Type a number and press Calculate.</span>
+  </body>
+</html>
