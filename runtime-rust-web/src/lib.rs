@@ -36,14 +36,16 @@ async fn compute_it() -> String {
     });
 
     // let point_import = Closure::<dyn Fn(Point) -> Point>::new(|mut point: Point| {
-    //     point.x += 100;
     //     point.y += 1000;
     //     point
     // });
 
-    let point_import = Closure::<dyn Fn(JsValue) -> JsValue>::new(|mut point: JsValue| {
-        // point.x += 100;
-        // point.y += 1000;
+    let point_import = Closure::<dyn Fn(JsValue) -> JsValue>::new(|point: JsValue| {
+        let y = Reflect::get(&point, &"y".into()).unwrap();
+        let y: i32 = y.as_f64().unwrap() as _;
+        let y = y + 1000;
+        let y: JsValue = y.into();
+        Reflect::set(&point, &"y".into(), &y).unwrap();
         point
     });
 
