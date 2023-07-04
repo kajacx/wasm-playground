@@ -4,4 +4,4 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-wasmtime = "10.0"
+wasm-bridge = "0.1.1"

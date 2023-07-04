@@ -1,4 +1,4 @@
-use wasmtime::*;
+use wasm_bridge::*;
 
 pub fn calculate_plus_three(number: i32) -> String {
     match add_three(number) {
