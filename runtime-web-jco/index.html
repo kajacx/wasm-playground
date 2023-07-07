@@ -29,10 +29,12 @@
               return WebAssembly.compile(await data.arrayBuffer(), imports);
             },
             {
-              print: console.log,
-              importPoint: (point) => {
-                point.x += 500;
-                return point;
+              print: { default: console.log },
+              ["import-point"]: {
+                default: (point) => {
+                  point.x += 500;
+                  return point;
+                },
               },
             }
           )
