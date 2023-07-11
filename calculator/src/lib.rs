@@ -1,31 +1,30 @@
-use wasm_bridge::*;
+use anyhow::Result;
+use wasm_bridge::component::*;
+use wasm_bridge::{Config, Engine, Store};
 
-pub fn calculate_plus_three(number: i32) -> String {
-    match add_three(number) {
+wasm_bridge::component::bindgen!({
+    path: "../protocol.wit",
+    world: "calculator",
+});
+
+pub fn calculate_plus_three(component_bytes: &[u8], number: i32) -> String {
+    match add_three(component_bytes, number) {
         Ok(result) => format!("{} + 3 = {}", number, result),
         Err(err) => format!("{err:?}"),
     }
 }
 
-fn add_three(number: i32) -> Result<i32> {
-    let wat = r#"
-      (module
-        (func $add_three (export "add_three")
-          (param $p0 i32) (result i32)
-          (i32.add (local.get $p0) (i32.const 3))
-        )
-      )
-    "#;
+fn add_three(component_bytes: &[u8], number: i32) -> Result<i32> {
+    let mut config = Config::new();
+    config.wasm_component_model(true);
 
-    let mut store = Store::<()>::default();
+    let engine = Engine::new(&config)?;
+    let mut store = Store::new(&engine, ());
 
-    let module = Module::new(&store.engine(), wat.as_bytes())?;
+    let component = Component::new(&store.engine(), &component_bytes)?;
 
-    let instance = Instance::new(&mut store, &module, &[])?;
+    let linker = Linker::new(store.engine());
+    let (instance, _) = Calculator::instantiate(&mut store, &component, &linker)?;
 
-    let add_three_wasm = instance.get_typed_func::<i32, i32>(&mut store, "add_three")?;
-
-    let result = add_three_wasm.call(&mut store, number)?;
-
-    Ok(result)
+    Ok(instance.call_add(&mut store, number, 3)?)
 }

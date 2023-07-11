@@ -1,0 +1,5 @@
+package usage:example
+
+world calculator {
+    export add: func(a: s32, b: s32) -> s32
+}

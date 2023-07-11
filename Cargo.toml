@@ -2,6 +2,7 @@
 
 members = [
     "calculator",
+    "plugin",
     "host-js",
     "host-sys",
 ]

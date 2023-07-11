@@ -1,6 +1,9 @@
+static PLUGIN_BYTES: &'static [u8] =
+    include_bytes!("../../target/wasm32-unknown-unknown/debug/component.wasm");
+
 fn main() {
     while let Some(number) = read_number() {
-        println!("{}", calculator::calculate_plus_three(number));
+        println!("{}", calculator::calculate_plus_three(PLUGIN_BYTES, number));
     }
     println!("Bye!");
 }
@@ -16,7 +19,10 @@ fn read_number() -> Option<i32> {
             if line == "exit" || line == "Exit" {
                 return None;
             }
-            println!("\"{}\" is not a number. Try again, or type \"exit\" to exit.", line);
+            println!(
+                "\"{}\" is not a number. Try again, or type \"exit\" to exit.",
+                line
+            );
             line = String::new();
         }
     }

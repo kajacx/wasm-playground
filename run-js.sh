@@ -1,6 +1,10 @@
 #!/usr/bin/sh
 set -e
 
+cd plugin
+sh build.sh
+cd ..
+
 cd host-js
 wasm-pack build --target=web
 rm -rf example-webserver/pkg
