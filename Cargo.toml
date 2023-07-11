@@ -1,0 +1,7 @@
+[workspace]
+
+members = [
+    "calculator",
+    "host-js",
+    "host-sys",
+]
