@@ -26,6 +26,7 @@ pub fn add_three_pair(a: i32, b: f32) -> (i32, f32) {
     (a, b)
 }
 
+#[allow(improper_ctypes)]
 #[link(wasm_import_module = "imported_fns")]
 extern "C" {
     fn add_one_i32(number: i32) -> i32;
