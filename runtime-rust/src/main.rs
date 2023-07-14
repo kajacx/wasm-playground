@@ -1,11 +1,22 @@
 use std::error::Error;
 
 use wasmtime::*;
+use wasmtime_wasi::{sync::WasiCtxBuilder, WasiCtx};
 
 const PLUGIN_BYTES: &'static [u8] =
     include_bytes!("../../plugin/target/wasm32-unknown-unknown/debug/wasmtime_plugin.wasm");
 
+const WASI_BYTES: &'static [u8] =
+    include_bytes!("../../plugin-wasi/target/wasm32-wasi/debug/wasmtime_plugin.wasm");
+
 fn main() -> Result<(), Box<dyn Error>> {
+    run_wasm()?;
+    run_wasi()?;
+
+    Ok(())
+}
+
+fn run_wasm() -> Result<(), Box<dyn Error>> {
     let mut store = Store::<()>::default();
 
     let module = Module::new(&store.engine(), PLUGIN_BYTES)?;
@@ -50,6 +61,32 @@ fn main() -> Result<(), Box<dyn Error>> {
     let returned = add_three_pair.call(&mut store, (5, 15.5))?;
     println!("Add three pair: {returned:?}");
     assert_eq!(returned, (5 + 3, 15.5 + 3.0));
+
+    Ok(())
+}
+
+fn run_wasi() -> Result<(), Box<dyn Error>> {
+    let wasi = WasiCtxBuilder::new().inherit_stdio().build();
+
+    let mut store = Store::new(&Engine::default(), wasi);
+
+    let module = Module::new(&store.engine(), WASI_BYTES)?;
+
+    let mut linker = Linker::<WasiCtx>::new(store.engine());
+    linker.func_wrap("imported_fns", "add_one_i32", |_: Caller<_>, val: i32| {
+        val.wrapping_add(1)
+    })?;
+
+    wasmtime_wasi::add_to_linker(&mut linker, |data| data)?;
+
+    let instance = linker.instantiate(&mut store, &module)?;
+
+    // Call imported fn
+    let add_three_i32 = instance.get_typed_func::<i32, i32>(&mut store, "add_three_i32")?;
+
+    let returned = add_three_i32.call(&mut store, 5)?;
+    println!("Add three WASI: {returned:?}");
+    assert_eq!(returned, 5 + 3);
 
     Ok(())
 }
