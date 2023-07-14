@@ -9,7 +9,7 @@
     <script type="module">
       import init, { compute } from "./pkg/runtime_rust_web.js";
       let wasm = await init("./pkg/runtime_rust_web_bg.wasm");
-      console.log("Result: ", wasm, await compute());
+      console.log("Result: ", await compute());
     </script>
   </body>
 </html>
