@@ -21,6 +21,13 @@ fn main() -> Result<(), Box<dyn Error>> {
     )?;
     let instance = linker.instantiate(&mut store, &module)?;
 
+    // Call imported fn
+    let add_three_i32 = instance.get_typed_func::<i32, i32>(&mut store, "add_three_i32")?;
+
+    let returned = add_three_i32.call(&mut store, 5)?;
+    println!("Add three: {returned:?}");
+    assert_eq!(returned, 5 + 3);
+
     // Multiple arguments
     let add_i32 = instance.get_typed_func::<(i32, i32), i32>(&mut store, "add_i32")?;
 
@@ -35,13 +42,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     let returned = add_sub_ten_i32.call(&mut store, 50)?;
     println!("Add sub ten: {returned:?}");
     assert_eq!(returned, (50 + 10, 50 - 10));
-
-    // Call imported fn
-    let add_three_i32 = instance.get_typed_func::<i32, i32>(&mut store, "add_three_i32")?;
-
-    let returned = add_three_i32.call(&mut store, 5)?;
-    println!("Add three: {returned:?}");
-    assert_eq!(returned, 5 + 3);
 
     // Pair of numbers
     let add_three_pair =
