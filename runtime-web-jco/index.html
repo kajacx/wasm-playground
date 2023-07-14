@@ -7,20 +7,6 @@
   </head>
   <body>
     <script type="module">
-      // fetch("./out-dir/component.js")
-      //   .then((resp) => resp.text())
-      //   .then(eval)
-      //   .then(console.log)
-      //   .catch(console.error);
-
-      // if (Math.random() < 2) {
-      //   import("./out-dir/component.js")
-      //     //  .then((resp) => resp.text())
-      //     //  .then(eval)
-      //     .then(console.log)
-      //     .catch(console.error);
-      // }
-
       import("./out-dir/component.js").then((module) => {
         module
           .instantiate(
@@ -32,16 +18,15 @@
               print: { default: console.log },
               ["import-point"]: {
                 default: (point) => {
-                  point.x += 500;
+                  point.x += 100;
                   return point;
                 },
               },
             }
           )
           .then((instance) => {
-            // alert(Reflect.get(instance, "movePoint"));
             instance.run();
-            console.log(instance.movePoint({ x: 5, y: 15 }));
+            console.log(instance.movePoint({ x: 50, y: 50 }));
           });
       });
     </script>

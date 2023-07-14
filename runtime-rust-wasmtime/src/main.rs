@@ -19,7 +19,7 @@ impl MyWorldImports for State {
     }
 
     fn import_point(&mut self, mut point: Point) -> wasmtime::Result<Point> {
-        point.x -= 100;
+        point.x += 100;
         Ok(point)
     }
 }
@@ -30,18 +30,6 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let engine = Engine::new(&config)?;
     let mut store = Store::new(&engine, State::default());
-
-    // let bytes =
-    //     // std::fs::read("../plugin-rust/target/wasm32-wasi/debug/plugin_rust.wasm").expect("bytres");
-    // std::fs::read("../plugin-rust/target/wasm32-unknown-unknown/debug/plugin_rust.wasm").expect("bytres");
-    // // let adapter_bytes =
-    // //     std::fs::read("../plugin-rust/wasi_snapshot_preview1.wasm").expect("adapter");
-
-    // let component_bytes = ComponentEncoder::default()
-    //     .module(&bytes)?
-    //     .validate(true)
-    //     // .adapter("wasm_to_component", &adapter_bytes)?
-    //     .encode()?;
 
     let component_bytes =
         std::fs::read("../plugin-rust/target/wasm32-unknown-unknown/debug/component.wasm")
@@ -58,7 +46,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     println!(
         "Point: {:?}",
-        my_world.call_move_point(&mut store, Point { x: 5, y: 5 })
+        my_world.call_move_point(&mut store, Point { x: 50, y: 50 })
     );
 
     Ok(())

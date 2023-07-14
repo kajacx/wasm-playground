@@ -14,7 +14,7 @@ impl MyWorld for Plugin {
     fn move_point(mut point: Point) -> Point {
         point = import_point(point);
         point.x += 10;
-        point.y -= 2;
+        point.y -= 20;
         point
     }
 }
