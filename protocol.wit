@@ -1,5 +1,7 @@
 package usage:example
 
 world calculator {
-    export add: func(a: s32, b: s32) -> s32
+    import add-one: func(num: s32) -> s32
+
+    export add-three: func(num: s32) -> s32
 }

@@ -6,8 +6,11 @@ wit_bindgen::generate!({
 struct Impl;
 
 impl Calculator for Impl {
-    fn add(a: i32, b: i32) -> i32 {
-        a + b
+    fn add_three(num: i32) -> i32 {
+        let num = add_one(num);
+        let num = add_one(num);
+        let num = add_one(num);
+        num
     }
 }
 
