@@ -1,9 +1,6 @@
-static PLUGIN_BYTES: &'static [u8] =
-    include_bytes!("../../target/wasm32-unknown-unknown/debug/component.wasm");
-
 fn main() {
     while let Some(number) = read_number() {
-        println!("{}", calculator::calculate_plus_three(PLUGIN_BYTES, number));
+        println!("{}", calculator::calculate_plus_three(number));
     }
     println!("Bye!");
 }
