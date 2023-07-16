@@ -129,7 +129,9 @@ function lowering6(arg0) {
   lowering6Callee(arg0 >>> 0);
 }
 const lowering7Callee = interface6.dropOutputStream;
+console.log("WHAT THE ACTUAL FUCK?", interface6, lowering7Callee);
 function lowering7(arg0) {
+  console.log("WHTTT????", lowering7Callee);
   lowering7Callee(arg0 >>> 0);
 }
 let exports2;

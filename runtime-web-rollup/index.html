@@ -35,6 +35,8 @@
                     // "import-point": `function (x) {
                     //   return x;
                     // }`,
+                    "import-point": "import-point.js",
+                    print: "print.js",
                   }
                 );
 
@@ -62,22 +64,22 @@
                   plugins: [
                     plugin([
                       ...files,
-                      //                       [
-                      //                         importName,
-                      //                         `
-                      //                   export const cargoCompImports = {
-                      //   "move-point": (point) => {
-                      //     point.x = point.x + 100;
-                      //     return point;
-                      //   },
-                      //   movePoint(point) {
-                      //     point.x = point.x + 1000;
-                      //     return point;
-                      //   },
-                      // };
-
-                      //                   `,
-                      // ],
+                      [
+                        "import-point.js",
+                        `export default {
+                          importPoint: function (point) {
+                          console.log("WHAT THE FUCK????");
+                          point.x = point.x + 100;
+                          return point;
+                        }}`,
+                      ],
+                      [
+                        "print.js",
+                        `export default {
+                          print: function (msg) {
+                          console.log("WHAT THE FUCK AGAIN????", msg);
+                        }}`,
+                      ],
                     ]),
                   ],
                 })
@@ -94,8 +96,8 @@
 
                 // whatSayYou = hello("Svelte");
                 // console.log({ whatSayYou });
-                console.log(movePoint({ x: 50, y: 50 }));
                 sayHello();
+                console.log(movePoint({ x: 50, y: 50 }));
               });
           });
         });

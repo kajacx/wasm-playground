@@ -7,9 +7,10 @@ world my-world {
     y: s32,
   }
 
-  // import import-point: func(pnt: point) -> point
+  import import-point: func(pnt: point) -> point
   export move-point: func(pnt: point) -> point
 
+  import print: func(msg: string)
   // Say "Hello" to stdout, use with wasi
   export say-hello: func()
 }
