@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <title>Wit wasi runtime rollup plugin</title>
+    <base href="." />
+  </head>
+  <body>
+    <script>
+      import("./src/plugin.js").then((plugin) => {
+        console.log("PLUGIN:", plugin);
+        import("./out-dir/component.js").then((module) => {
+          module
+            .instantiate(
+              async (url, imports) => {
+                let data = await fetch("out-dir/" + url);
+                return WebAssembly.compile(await data.arrayBuffer(), imports);
+              },
+              {
+                print: { default: console.log },
+                ["import-point"]: {
+                  default: (point) => {
+                    point.x += 100;
+                    return point;
+                  },
+                },
+              }
+            )
+            .then((instance) => {
+              instance.run();
+              console.log(instance.movePoint({ x: 50, y: 50 }));
+            });
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,14 @@
+version: "3.7"
+
+services:
+  wit-runtime-web-rullup:
+    image: nginx:latest
+    container_name: wit-runtime-web-rullup
+    ports:
+      - "8098:80"
+    volumes:
+      - .:/usr/share/nginx/html
+    networks: []
+    restart: unless-stopped
+
+networks: {}
