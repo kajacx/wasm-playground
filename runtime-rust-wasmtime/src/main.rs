@@ -57,8 +57,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let engine = Engine::new(&config)?;
     let mut store = Store::new(&engine, State { table, wasi });
 
-    let component_bytes = std::fs::read("../plugin-wasi/target/wasm32-wasi/debug/plugin_wasi.wasm")
-        .expect("component bytes");
+    let component_bytes =
+        std::fs::read("../plugin-wasi/target/wasm32-wasi/release/plugin_wasi.wasm")
+            .expect("component bytes");
 
     let component = Component::new(&store.engine(), &component_bytes).expect("create component");
 
