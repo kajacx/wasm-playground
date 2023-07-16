@@ -7,9 +7,13 @@
   </head>
   <body>
     <script>
-      fetch("./out-dir/plugin_wasi.wasi")
-        .then((resp) => resp.arrayBuffer())
+      fetch("./out-dir/plugin_wasi.wasm")
+        .then((resp) => {
+          console.log("RESP:", resp);
+          return resp.arrayBuffer();
+        })
         .then((wasmBytes) => {
+          console.log("WASM BYTES:", wasmBytes);
           import("./src/bindgen.js").then(async ({ generate, $init }) => {
             console.log("BINDGEN:", { generate, $init });
 
@@ -28,12 +32,14 @@
             ];
             let wasiImports = {};
             for (let wasiImportFile of wasiImportsFiles) {
-              wasiImports[`@bytecodealliance/preview2-shim/${wasiImportFile}`] =
-                await import(`/src/browser/${wasiImportFile}.js`);
+              // wasiImports[`@bytecodealliance/preview2-shim/${wasiImportFile}`] =
+              wasiImports[`${wasiImportFile}`] = await import(
+                `/src/browser/${wasiImportFile}.js`
+              );
             }
             console.log("WASI IMPORTS:", wasiImports);
 
-            let name = "hello-jco-generated";
+            let name = "hello-world";
             let opts = {
               name,
               // map: Object.entries(map ?? {}),
@@ -48,30 +54,48 @@
             let generated = generate(wasmBytes, opts);
             console.log("WITH jco at runtime:", generated);
 
+            let { files } = generated;
+            let bytes = files.find((file) => file[0] == `${name}.js`)[1];
+            let text = Utf8ArrayToStr(bytes);
+            console.log("TEXT:", text);
+
+            let bytesTs = files.find((file) => file[0] == `${name}.d.ts`)[1];
+            let textTs = Utf8ArrayToStr(bytesTs);
+            console.log("TEXT TS:", textTs);
+
+            let blob = new Blob([bytes], { type: "text/javascript" });
+            let url = URL.createObjectURL(blob);
+
+            let { instantiate } = await import(url);
+
             let instance = await instantiate(
               (core, imports) => {
                 console.log("Compiling core ...", core, imports);
-                // let file = files.find((f) => f[0] === core)[1];
-                // console.log("Found file", file);
-                // return WebAssembly.compile(file);
-                return fetch(`/out-dir/${core}`)
-                  .then((resp) => resp.arrayBuffer())
-                  .then((buffer) => {
-                    console.log("compile core buffer:", buffer);
-                    return WebAssembly.compile(buffer);
-                  });
+                let file = files.find((f) => f[0] === core)[1];
+                console.log("Found file", file);
+                return WebAssembly.compile(file);
+                // return fetch(`/out-dir/${core}`)
+                //   .then((resp) => resp.arrayBuffer())
+                //   .then((buffer) => {
+                //     console.log("compile core buffer:", buffer);
+                //     return WebAssembly.compile(buffer);
+                //   });
               },
               {
                 "import-point": {
-                  default(point) {
-                    console.log("IN JCO INSTANTIATED IMPORTS", point);
-                    point.x = point.x + 100;
-                    return point;
+                  default: {
+                    importPoint(point) {
+                      console.log("IN JCO runtime INSTANTIATED IMPORTS", point);
+                      point.x = point.x + 100;
+                      return point;
+                    },
                   },
                 },
                 print: {
-                  default(msg) {
-                    console.log("IN JCO INSTANTIATED PRINT:", msg);
+                  default: {
+                    print(msg) {
+                      console.log("IN JCO runtime INSTANTIATED PRINT:", msg);
+                    },
                   },
                 },
                 ...wasiImports,
@@ -84,6 +108,59 @@
             console.log(movePoint({ x: 50, y: 50 }));
           });
         });
+
+      // http://www.onicos.com/staff/iz/amuse/javascript/expert/utf.txt
+
+      /* utf.js - UTF-8 <=> UTF-16 convertion
+       *
+       * Copyright (C) 1999 Masanao Izumo <iz@onicos.co.jp>
+       * Version: 1.0
+       * LastModified: Dec 25 1999
+       * This library is free.  You can redistribute it and/or modify it.
+       */
+
+      function Utf8ArrayToStr(array) {
+        var out, i, len, c;
+        var char2, char3;
+
+        out = "";
+        len = array.length;
+        i = 0;
+        while (i < len) {
+          c = array[i++];
+          switch (c >> 4) {
+            case 0:
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+            case 5:
+            case 6:
+            case 7:
+              // 0xxxxxxx
+              out += String.fromCharCode(c);
+              break;
+            case 12:
+            case 13:
+              // 110x xxxx   10xx xxxx
+              char2 = array[i++];
+              out += String.fromCharCode(((c & 0x1f) << 6) | (char2 & 0x3f));
+              break;
+            case 14:
+              // 1110 xxxx  10xx xxxx  10xx xxxx
+              char2 = array[i++];
+              char3 = array[i++];
+              out += String.fromCharCode(
+                ((c & 0x0f) << 12) |
+                  ((char2 & 0x3f) << 6) |
+                  ((char3 & 0x3f) << 0)
+              );
+              break;
+          }
+        }
+
+        return out;
+      }
     </script>
   </body>
 </html>
