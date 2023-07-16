@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <title>Wit wasi runtime jco generated</title>
+    <base href="." />
+  </head>
+  <body>
+    <script>
+      fetch("./out-dir/plugin_wasi.wasi")
+        .then((resp) => resp.arrayBuffer())
+        .then((wasmBytes) => {
+          import("./src/bindgen.js").then(async ({ generate, $init }) => {
+            console.log("BINDGEN:", { generate, $init });
+
+            await $init;
+
+            let wasiImportsFiles = [
+              "cli-base",
+              "clocks",
+              "filesystem",
+              "http",
+              "io",
+              "logging",
+              "poll",
+              "random",
+              "sockets",
+            ];
+            let wasiImports = {};
+            for (let wasiImportFile of wasiImportsFiles) {
+              wasiImports[`@bytecodealliance/preview2-shim/${wasiImportFile}`] =
+                await import(`/src/browser/${wasiImportFile}.js`);
+            }
+            console.log("WASI IMPORTS:", wasiImports);
+
+            let name = "hello-jco-generated";
+            let opts = {
+              name,
+              // map: Object.entries(map ?? {}),
+              map: [],
+              instantiation: true,
+              validLiftingOptimization: false,
+              noNodejsCompat: true,
+              tlaCompat: false,
+              base64Cutoff: 4096,
+            };
+            // pass into generate along with bytes
+            let generated = generate(wasmBytes, opts);
+            console.log("WITH jco at runtime:", generated);
+
+            let instance = await instantiate(
+              (core, imports) => {
+                console.log("Compiling core ...", core, imports);
+                // let file = files.find((f) => f[0] === core)[1];
+                // console.log("Found file", file);
+                // return WebAssembly.compile(file);
+                return fetch(`/out-dir/${core}`)
+                  .then((resp) => resp.arrayBuffer())
+                  .then((buffer) => {
+                    console.log("compile core buffer:", buffer);
+                    return WebAssembly.compile(buffer);
+                  });
+              },
+              {
+                "import-point": {
+                  default(point) {
+                    console.log("IN JCO INSTANTIATED IMPORTS", point);
+                    point.x = point.x + 100;
+                    return point;
+                  },
+                },
+                print: {
+                  default(msg) {
+                    console.log("IN JCO INSTANTIATED PRINT:", msg);
+                  },
+                },
+                ...wasiImports,
+              }
+            );
+            console.log("INSTANCE:", instance);
+            let { movePoint, sayHello } = instance;
+
+            sayHello();
+            console.log(movePoint({ x: 50, y: 50 }));
+          });
+        });
+    </script>
+  </body>
+</html>
