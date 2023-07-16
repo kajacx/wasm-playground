@@ -7,28 +7,14 @@
   </head>
   <body>
     <script>
-      import("./src/plugin.js").then((plugin) => {
-        console.log("PLUGIN:", plugin);
-        import("./out-dir/component.js").then((module) => {
-          module
-            .instantiate(
-              async (url, imports) => {
-                let data = await fetch("out-dir/" + url);
-                return WebAssembly.compile(await data.arrayBuffer(), imports);
-              },
-              {
-                print: { default: console.log },
-                ["import-point"]: {
-                  default: (point) => {
-                    point.x += 100;
-                    return point;
-                  },
-                },
-              }
-            )
-            .then((instance) => {
-              instance.run();
-              console.log(instance.movePoint({ x: 50, y: 50 }));
+      import("./src/bindgen.js").then((bindgen) => {
+        console.log("BINDGEN:", bindgen);
+        import("./src/plugin.js").then((plugin) => {
+          console.log("PLUGIN:", plugin);
+          fetch("./out-dir/plugin_wasi.wasm")
+            .then((resp) => resp.arrayBuffer())
+            .then((plugin_bytes) => {
+              console.log("PLUGIN_BYTES:", plugin_bytes);
             });
         });
       });
