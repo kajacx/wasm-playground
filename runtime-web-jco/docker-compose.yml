@@ -1,11 +1,11 @@
 version: "3.7"
 
 services:
-  wit-runtime-wasi-web-rullup:
+  wit-runtime-wasi-web-jco:
     image: nginx:latest
-    container_name: wit-runtime-wasi-web-rullup
+    container_name: wit-runtime-wasi-web-jco
     ports:
-      - "8098:80"
+      - "8099:80"
     volumes:
       - .:/usr/share/nginx/html
     networks: []
