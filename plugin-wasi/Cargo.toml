@@ -9,12 +9,11 @@ crate-type = ["cdylib"]
 [package.metadata.component]
 package = "component:plugin-wasi"
 
-[package.metadata.component.target]
-path = ".."
 
 [package.metadata.component.dependencies]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-wit-bindgen = { version = "0.6.0", default-features = false }
+wit-bindgen = { version = "0.8.0" }
+

@@ -1,8 +1,7 @@
-// wit_bindgen::generate!({
-//     path: "../protocol.wit",
-//     world: "my-world",
-// });
-use bindings::*;
+wit_bindgen::generate!({
+    path: "../protocol.wit",
+    world: "my-world",
+});
 
 struct Plugin;
 
@@ -15,9 +14,8 @@ impl MyWorld for Plugin {
     }
 
     fn say_hello() {
-        println!("Hello from updated wasi plugin, will it print?");
+        println!("Hello from updated (yet again) wasi plugin, will it print?");
     }
 }
 
-// export_my_world!(Plugin);
-export!(Plugin);
+export_my_world!(Plugin);
