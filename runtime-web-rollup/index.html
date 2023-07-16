@@ -7,15 +7,97 @@
   </head>
   <body>
     <script>
-      import("./src/bindgen.js").then((bindgen) => {
-        console.log("BINDGEN:", bindgen);
-        import("./src/plugin.js").then((plugin) => {
-          console.log("PLUGIN:", plugin);
-          fetch("./out-dir/plugin_wasi.wasm")
-            .then((resp) => resp.arrayBuffer())
-            .then((plugin_bytes) => {
-              console.log("PLUGIN_BYTES:", plugin_bytes);
-            });
+      import("./src/rollup.browser.es.js").then(({ rollup }) => {
+        console.log("ROLLUP:", rollup);
+        import("./src/bindgen.js").then((bindgen) => {
+          console.log("BINDGEN:", bindgen);
+          import("./src/plugin.js").then(({ plugin }) => {
+            console.log("PLUGIN:", plugin);
+            fetch("./out-dir/plugin_wasi.wasm")
+              .then((resp) => resp.arrayBuffer())
+              .then(async (wasmBytes) => {
+                console.log("PLUGIN_BYTES:", wasmBytes);
+
+                await bindgen.$init;
+                const generate = bindgen.generate;
+
+                //const importName = "./src/wit_imports.js";
+                // TODO: the are the same files?
+                let map = Object.assign(
+                  {
+                    "wasi:*":
+                      "https://unpkg.com/@bytecodealliance/preview2-shim@0.0.9/lib/browser/*", // also works
+                    //'wasi:*': '@bytecodealliance/preview2-shim@0.0.9/lib/browser/*' // plugin will us unpkg to resolve
+                  },
+                  {
+                    // specify location of imported functions, if applicable
+                    // "component:cargo-comp": importName,
+                    // "import-point": `function (x) {
+                    //   return x;
+                    // }`,
+                  }
+                );
+
+                // import(importName).then((im) => {
+                //   console.log("WHAT IS IMPORTER?", im);
+                // });
+
+                let name = "hello-world";
+                // see jco/cmd/transpile.js
+                let opts = {
+                  name,
+                  map: Object.entries(map ?? {}),
+                  instantiation: false,
+                  validLiftingOptimization: false,
+                  noNodejsCompat: true,
+                  tlaCompat: false,
+                  base64Cutoff: 4096,
+                };
+                // pass into generate along with bytes
+                let { files, imports, exports } = generate(wasmBytes, opts);
+                console.log({ files, imports, exports });
+
+                code = await rollup({
+                  input: name + ".js",
+                  plugins: [
+                    plugin([
+                      ...files,
+                      //                       [
+                      //                         importName,
+                      //                         `
+                      //                   export const cargoCompImports = {
+                      //   "move-point": (point) => {
+                      //     point.x = point.x + 100;
+                      //     return point;
+                      //   },
+                      //   movePoint(point) {
+                      //     point.x = point.x + 1000;
+                      //     return point;
+                      //   },
+                      // };
+
+                      //                   `,
+                      // ],
+                    ]),
+                  ],
+                })
+                  .then((bundle) => bundle.generate({ format: "es" }))
+                  .then(({ output }) => output[0].code);
+
+                // generate url from code blob
+                let blob = new Blob([code], { type: "text/javascript" });
+                let url = URL.createObjectURL(blob);
+
+                let { movePoint, sayHello } = await import(
+                  /* @vite-ignore */ url
+                );
+
+                // whatSayYou = hello("Svelte");
+                // console.log({ whatSayYou });
+                console.log(movePoint({ x: 50, y: 50 }));
+                sayHello();
+              });
+          });
         });
       });
     </script>
