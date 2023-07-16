@@ -25,9 +25,9 @@
                 // TODO: the are the same files?
                 let map = Object.assign(
                   {
-                    "wasi:*":
-                      "https://unpkg.com/@bytecodealliance/preview2-shim@0.0.9/lib/browser/*", // also works
+                    // "wasi:*": "https://unpkg.com/@bytecodealliance/preview2-shim@0.0.9/lib/browser/*", // also works
                     //'wasi:*': '@bytecodealliance/preview2-shim@0.0.9/lib/browser/*' // plugin will us unpkg to resolve
+                    "wasi:*": "wasi-import-*.js",
                   },
                   {
                     // specify location of imported functions, if applicable
@@ -35,10 +35,27 @@
                     // "import-point": `function (x) {
                     //   return x;
                     // }`,
-                    "import-point": "import-point.js",
-                    print: "print.js",
+                    // "import-point": "import-point.js",
+                    // print: "print.js",
                   }
                 );
+
+                let wasiImportsFiles = [
+                  "cli-base",
+                  "clocks",
+                  "filesystem",
+                  "http",
+                  "io",
+                  "logging",
+                  "poll",
+                  "random",
+                  "sockets",
+                ];
+                let wasiImports = {};
+                for (let wasiImportFile of wasiImportsFiles) {
+                  wasiImports[`wasi-import-${wasiImportFile}.js`] =
+                    await import(`/src/browser/${wasiImportFile}.js`);
+                }
 
                 // import(importName).then((im) => {
                 //   console.log("WHAT IS IMPORTER?", im);
@@ -49,14 +66,17 @@
                 let opts = {
                   name,
                   map: Object.entries(map ?? {}),
-                  instantiation: false,
+                  instantiation: true,
                   validLiftingOptimization: false,
                   noNodejsCompat: true,
                   tlaCompat: false,
                   base64Cutoff: 4096,
                 };
                 // pass into generate along with bytes
-                let { files, imports, exports } = generate(wasmBytes, opts);
+                let generated = generate(wasmBytes, opts);
+                console.log("WITH INSTANTIATION:", generated);
+
+                let { files, imports, exports } = generated;
                 console.log({ files, imports, exports });
 
                 code = await rollup({
@@ -90,9 +110,44 @@
                 let blob = new Blob([code], { type: "text/javascript" });
                 let url = URL.createObjectURL(blob);
 
-                let { movePoint, sayHello } = await import(
-                  /* @vite-ignore */ url
+                let imported = await import(/* @vite-ignore */ url);
+                console.log("IMPORTED:", imported);
+
+                let instance = await imported.instantiate(
+                  (core, imports) => {
+                    console.log("Compiling core ...", core, imports);
+                    let file = files.find((f) => f[0] === core)[1];
+                    console.log("Found file", file);
+                    return WebAssembly.compile(file);
+                  },
+                  {
+                    "import-point": {
+                      default: {
+                        importPoint(point) {
+                          console.log("IN INSTANTIATED IMPORTS", point);
+                          point.x = point.x + 100;
+                          return point;
+                        },
+                      },
+                    },
+                    print: {
+                      default: {
+                        print(msg) {
+                          console.log("IN INSTANTIATED PRINT:", msg);
+                        },
+                      },
+                    },
+                    // "wasi-import-filesystem.js": await import(
+                    //   "/src/browser/filesystem.js"
+                    // ).then((fetched) => {
+                    //   console.log("FETCHED:", fetched);
+                    //   return fetched;
+                    // }),
+                    ...wasiImports,
+                  }
                 );
+                console.log("INSTANCE:", instance);
+                let { movePoint, sayHello } = instance;
 
                 // whatSayYou = hello("Svelte");
                 // console.log({ whatSayYou });
