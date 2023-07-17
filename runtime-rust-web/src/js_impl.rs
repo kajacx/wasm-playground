@@ -84,7 +84,7 @@ pub async fn instantiate(import_point: impl Fn(Point) -> Point + 'static) -> Ins
 }
 
 fn point_from_js_value(value: &JsValue) -> Point {
-    let x = Reflect::get(&value, &"y".into()).unwrap().as_f64().unwrap() as i32;
+    let x = Reflect::get(&value, &"x".into()).unwrap().as_f64().unwrap() as i32;
     let y = Reflect::get(&value, &"y".into()).unwrap().as_f64().unwrap() as i32;
     Point { x, y }
 }
