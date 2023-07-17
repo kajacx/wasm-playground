@@ -6,6 +6,14 @@
     <base href="." />
   </head>
   <body>
+    <p>Note: This is a proof-of-concept project.</p>
+    <p>
+      If you want to load WASM modules on the web in Rust, use the
+      <a href="https://github.com/kajacx/wasm-bridge" target="_blank"
+        >wasm-bridge</a
+      >
+      crate.
+    </p>
     <script type="module">
       import init, { compute } from "./pkg/runtime_rust_web.js";
       let wasm = await init("./pkg/runtime_rust_web_bg.wasm");
