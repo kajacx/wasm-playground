@@ -1,4 +1,2 @@
-*
-!/.gitignore
-!/docker-compose.yml
-!/index.html
+/out-dir/*
+!/out-dir/better-component.js
