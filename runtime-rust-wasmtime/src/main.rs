@@ -1,7 +1,7 @@
 use std::error::Error;
 use wasmtime::{
     component::{Component, Linker},
-    Config, Engine, Store,
+    Config, Engine, Result, Store,
 };
 
 use wasmtime_wasi::preview2::*;
@@ -39,9 +39,14 @@ impl WasiView for State {
 
 #[async_trait::async_trait]
 impl MyWorldImports for State {
-    async fn import_point(&mut self, mut point: Point) -> wasmtime::Result<Point> {
+    async fn import_point(&mut self, mut point: Point) -> Result<Point> {
         point.x += 100;
         Ok(point)
+    }
+
+    async fn print(&mut self, msg: String) -> Result<()> {
+        println!("From sys host: {msg}");
+        Ok(())
     }
 }
 
