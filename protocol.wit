@@ -11,4 +11,6 @@ world my-world {
 
   export run: func()
   export move-point: func(pnt: point) -> point
+
+  export increment: func() -> s32
 }
