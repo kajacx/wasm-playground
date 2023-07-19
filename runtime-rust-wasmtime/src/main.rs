@@ -13,14 +13,16 @@ wasmtime::component::bindgen!({
 struct State {}
 
 impl MyWorldImports for State {
-    fn print(&mut self, msg: String) -> wasmtime::Result<()> {
-        println!("Printing in host: {msg}");
-        Ok(())
-    }
-
     fn import_point(&mut self, mut point: Point) -> wasmtime::Result<Point> {
         point.x += 100;
         Ok(point)
+    }
+}
+
+impl example::protocol::host_imports::Host for State {
+    fn print_line(&mut self, msg: String) -> wasmtime::Result<()> {
+        println!("Printing in host: {msg}");
+        Ok(())
     }
 }
 
@@ -42,8 +44,11 @@ fn main() -> Result<(), Box<dyn Error>> {
     MyWorld::add_to_linker(&mut linker, |state| state)?;
     let (my_world, _instance) = MyWorld::instantiate(&mut store, &component, &linker)?;
 
-    my_world.call_run(&mut store)?;
+    my_world
+        .example_protocol_guest_exports()
+        .call_run(&mut store)?;
 
+    let (my_world, _instance) = MyWorld::instantiate(&mut store, &component, &linker)?;
     println!(
         "Point: {:?}",
         my_world.call_move_point(&mut store, Point { x: 50, y: 50 })

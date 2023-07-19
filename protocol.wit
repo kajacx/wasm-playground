@@ -1,16 +1,26 @@
 package example:protocol
 
+interface host-imports {
+  print-line: func(msg: string)
+}
+
+interface guest-exports {
+  run: func()
+}
+
 world my-world {
   record point {
     x: s32,
     y: s32,
   }
 
-  import print: func(msg: string)
-  import import-point: func(pnt: point) -> point
+  import host-imports
+  export guest-exports
 
-  export run: func()
+  import import-point: func(pnt: point) -> point
   export move-point: func(pnt: point) -> point
 
   export increment: func() -> s32
+
+  export sqrt: func(num: float32) -> result<float32, string>
 }
