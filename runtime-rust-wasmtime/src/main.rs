@@ -26,6 +26,12 @@ impl example::protocol::host_imports::Host for State {
     }
 }
 
+impl inline_imports::Host for State {
+    fn add_one(&mut self, num: i32) -> wasmtime::Result<i32> {
+        Ok(num + 1)
+    }
+}
+
 fn main() -> Result<(), Box<dyn Error>> {
     let mut config = Config::new();
     config.wasm_component_model(true);
@@ -48,11 +54,13 @@ fn main() -> Result<(), Box<dyn Error>> {
         .example_protocol_guest_exports()
         .call_run(&mut store)?;
 
-    let (my_world, _instance) = MyWorld::instantiate(&mut store, &component, &linker)?;
     println!(
         "Point: {:?}",
         my_world.call_move_point(&mut store, Point { x: 50, y: 50 })
     );
+
+    let result = my_world.inline_exports().call_add_three(&mut store, 5)?;
+    println!("5 + 3 = {result}");
 
     Ok(())
 }

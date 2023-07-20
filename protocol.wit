@@ -17,6 +17,13 @@ world my-world {
   import host-imports
   export guest-exports
 
+  import inline-imports: interface {
+    add-one: func(num: s32) -> s32
+  }
+  export inline-exports: interface {
+    add-three: func(num: s32) -> s32
+  }
+
   import import-point: func(pnt: point) -> point
   export move-point: func(pnt: point) -> point
 

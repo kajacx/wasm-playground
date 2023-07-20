@@ -38,4 +38,13 @@ impl exports::example::protocol::guest_exports::GuestExports for Plugin {
     }
 }
 
+impl exports::inline_exports::InlineExports for Plugin {
+    fn add_three(num: i32) -> i32 {
+        let num = inline_imports::add_one(num);
+        let num = inline_imports::add_one(num);
+        let num = inline_imports::add_one(num);
+        num
+    }
+}
+
 export_my_world!(Plugin);
