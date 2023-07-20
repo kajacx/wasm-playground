@@ -7,13 +7,13 @@
   </head>
   <body>
     <script type="module">
-      import("./out-dir/better-component.js").then(async (module) => {
+      import("./out-dir/component.js").then(async (module) => {
         let instantiate = () =>
           module.instantiate(
-            // async (url, imports) => {
-            //   let data = await fetch("out-dir/" + url);
-            //   return WebAssembly.compile(await data.arrayBuffer(), imports);
-            // },
+            async (url, imports) => {
+              let data = await fetch("out-dir/" + url);
+              return WebAssembly.compile(await data.arrayBuffer(), imports);
+            },
             {
               print: { default: console.log },
               ["import-point"]: {
@@ -22,12 +22,16 @@
                   return point;
                 },
               },
+              ["example:protocol/host-imports"]: {
+                printLine: console.log,
+              },
             }
           );
 
         let instance1 = await instantiate();
-        instance1.run();
         console.log(instance1.movePoint({ x: 50, y: 50 }));
+
+        instance1["example:protocol/guest-exports"].run();
 
         let instance2 = await instantiate();
 
