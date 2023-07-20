@@ -28,6 +28,10 @@
               ["inline-imports"]: {
                 addOne: (num) => num + 1,
               },
+              // cSpell::disable-next-line
+              singlewordimports: {
+                subOne: (num) => num - 1,
+              },
             }
           );
 
@@ -36,11 +40,16 @@
 
         instance1["example:protocol/guest-exports"].run();
 
-        console.log(instance1);
         console.log(
           "5 + 3 =",
           // instance1["inline-exports"].addThree(5) TS bindings wrong again
           instance1.inlineExports.addThree(5)
+        );
+
+        console.log(
+          "5 - 3 =",
+          // cSpell::disable-next-line
+          instance1.singlewordexports.subThree(5)
         );
 
         let instance2 = await instantiate();

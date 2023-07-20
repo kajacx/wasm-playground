@@ -32,6 +32,13 @@ impl inline_imports::Host for State {
     }
 }
 
+// cSpell::disable-next-line
+impl singlewordimports::Host for State {
+    fn sub_one(&mut self, num: i32) -> wasmtime::Result<i32> {
+        Ok(num - 1)
+    }
+}
+
 fn main() -> Result<(), Box<dyn Error>> {
     let mut config = Config::new();
     config.wasm_component_model(true);
@@ -61,6 +68,10 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let result = my_world.inline_exports().call_add_three(&mut store, 5)?;
     println!("5 + 3 = {result}");
+
+    // cSpell::disable-next-line
+    let result = my_world.singlewordexports().call_sub_three(&mut store, 5)?;
+    println!("5 - 3 = {result}");
 
     Ok(())
 }

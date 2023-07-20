@@ -47,4 +47,15 @@ impl exports::inline_exports::InlineExports for Guest {
     }
 }
 
+// cSpell::disable
+impl exports::singlewordexports::Singlewordexports for Guest {
+    fn sub_three(num: i32) -> i32 {
+        let num = singlewordimports::sub_one(num);
+        let num = singlewordimports::sub_one(num);
+        let num = singlewordimports::sub_one(num);
+        num
+    }
+}
+// cSpell::enable
+
 export_my_world!(Guest);
