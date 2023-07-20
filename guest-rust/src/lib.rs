@@ -5,11 +5,11 @@ wit_bindgen::generate!({
     world: "my-world",
 });
 
-struct Plugin;
+struct Guest;
 
 static GLOBAL_VALUE: Mutex<i32> = Mutex::new(0);
 
-impl MyWorld for Plugin {
+impl MyWorld for Guest {
     fn move_point(mut point: Point) -> Point {
         point = import_point(point);
         point.x += 10;
@@ -31,14 +31,14 @@ impl MyWorld for Plugin {
     }
 }
 
-impl exports::example::protocol::guest_exports::GuestExports for Plugin {
+impl exports::example::protocol::guest_exports::GuestExports for Guest {
     fn run() {
         example::protocol::host_imports::print_line("Hello, world!");
         example::protocol::host_imports::print_line("Hello, again!");
     }
 }
 
-impl exports::inline_exports::InlineExports for Plugin {
+impl exports::inline_exports::InlineExports for Guest {
     fn add_three(num: i32) -> i32 {
         let num = inline_imports::add_one(num);
         let num = inline_imports::add_one(num);
@@ -47,4 +47,4 @@ impl exports::inline_exports::InlineExports for Plugin {
     }
 }
 
-export_my_world!(Plugin);
+export_my_world!(Guest);

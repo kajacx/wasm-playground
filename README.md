@@ -2,10 +2,10 @@
 
 This is a proof-of-concept project that showcased how to use wit bindgen in Rust and on the web.
 
-## Rust plugin
+## Rust guest
 
-Inspect the [plugin-rust](/plugin-rust/) folder,
-and see the [`build-plugin.sh`](/plugin-rust/build-plugin.sh) script on how to build the plugin.
+Inspect the [guest-rust](/guest-rust/) folder,
+and see the [`build-guest.sh`](/guest-rust/build-guest.sh) script on how to build the guest.
 
 ## Rust wasmtime runtime
 

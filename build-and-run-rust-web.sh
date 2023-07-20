@@ -1,12 +1,12 @@
 #!/usr/bin/sh
 set -e
 
-plugin-rust/build-plugin.sh
+guest-rust/build-guest.sh
 
 cd runtime-rust-web
 
 rm -rf rust-web/out-dir
-cp -r ../plugin-rust/target/wasm32-unknown-unknown/debug/out-dir rust-web/
+cp -r ../guest-rust/target/wasm32-unknown-unknown/debug/out-dir rust-web/
 
 wasm-pack build --target web
 rm -rf rust-web/pkg

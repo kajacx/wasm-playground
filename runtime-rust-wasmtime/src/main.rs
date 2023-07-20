@@ -40,7 +40,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut store = Store::new(&engine, State::default());
 
     let component_bytes =
-        std::fs::read("../plugin-rust/target/wasm32-unknown-unknown/debug/component.wasm")
+        std::fs::read("../guest-rust/target/wasm32-unknown-unknown/debug/component.wasm")
             .expect("component bytes");
 
     let component = Component::new(&store.engine(), &component_bytes).expect("create component");

@@ -1,7 +1,7 @@
 #!/usr/bin/sh
 set -e
 
-plugin-rust/build-plugin.sh
+guest-rust/build-guest.sh
 
 cd runtime-rust-wasmtime
 cargo run
