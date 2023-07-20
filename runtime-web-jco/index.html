@@ -25,6 +25,9 @@
               ["example:protocol/host-imports"]: {
                 printLine: console.log,
               },
+              ["inline-imports"]: {
+                addOne: (num) => num + 1,
+              },
             }
           );
 
@@ -32,6 +35,13 @@
         console.log(instance1.movePoint({ x: 50, y: 50 }));
 
         instance1["example:protocol/guest-exports"].run();
+
+        console.log(instance1);
+        console.log(
+          "5 + 3 =",
+          // instance1["inline-exports"].addThree(5) TS bindings wrong again
+          instance1.inlineExports.addThree(5)
+        );
 
         let instance2 = await instantiate();
 
