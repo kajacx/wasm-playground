@@ -1,7 +1,7 @@
 #!/usr/bin/sh
 set -e
 
-cd plugin
+cd guest
 sh build.sh
 cd ..
 
