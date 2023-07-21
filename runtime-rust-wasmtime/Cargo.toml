@@ -7,6 +7,4 @@ edition = "2021"
 
 [dependencies]
 wasmtime = { version = "10.0.1", features = ["component-model"] }
-wasmtime-wit-bindgen = "10.0.1"
-wit-component = "0.11.0"
 
