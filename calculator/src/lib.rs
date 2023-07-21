@@ -2,7 +2,7 @@ use wasm_bridge::component::*;
 use wasm_bridge::{Config, Engine, Result, Store};
 
 static COMPONENT_BYTES: &'static [u8] =
-    include_bytes!("../../target/wasm32-unknown-unknown/debug/component.zip");
+    include_bytes!("../../target/wasm32-unknown-unknown/debug/component.wasm");
 
 wasm_bridge::component::bindgen!({
     path: "../protocol.wit",
@@ -31,8 +31,7 @@ fn add_three(number: i32) -> Result<i32> {
     let engine = Engine::new(&config)?;
     let mut store = Store::new(&engine, Imports);
 
-    let component =
-        wasm_bridge::component::new_universal_component(&store.engine(), COMPONENT_BYTES)?;
+    let component = Component::new(&store.engine(), COMPONENT_BYTES)?;
 
     let mut linker = Linker::new(store.engine());
     Calculator::add_to_linker(&mut linker, |data| data)?;
