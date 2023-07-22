@@ -1,4 +1,7 @@
-use std::error::Error;
+use std::{
+    error::Error,
+    sync::{Arc, Mutex},
+};
 use wasmtime::{
     component::{Component, Linker},
     Config, Engine, Result, Store,
@@ -52,14 +55,35 @@ impl MyWorldImports for State {
 
 impl example::protocol::types::Host for State {}
 
+struct OutStream(Arc<Mutex<Vec<u8>>>);
+
+#[async_trait::async_trait]
+impl OutputStream for OutStream {
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+
+    async fn writable(&self) -> Result<()> {
+        Ok(())
+    }
+
+    async fn write(&mut self, buf: &[u8]) -> Result<u64> {
+        self.0.try_lock().unwrap().extend(buf);
+        Ok(buf.len() as u64)
+    }
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     let mut config = Config::new();
     config.wasm_component_model(true);
     config.async_support(true);
 
+    let out_bytes = Arc::new(Mutex::new(Vec::<u8>::new()));
+    let out = OutStream(out_bytes.clone());
+
     let mut table = Table::new();
-    let wasi = WasiCtxBuilder::new().inherit_stdio().build(&mut table)?;
+    let wasi = WasiCtxBuilder::new().set_stdout(out).build(&mut table)?;
 
     let engine = Engine::new(&config)?;
     let mut store = Store::new(&engine, State { table, wasi });
@@ -91,6 +115,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
     );
 
     my_world.call_say_hello(&mut store).await?;
+
+    println!(
+        "BYTES: {:?}",
+        std::str::from_utf8(&*out_bytes.try_lock().unwrap())
+    );
 
     Ok(())
 }
