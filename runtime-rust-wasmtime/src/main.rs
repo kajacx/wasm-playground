@@ -50,6 +50,8 @@ impl MyWorldImports for State {
     }
 }
 
+impl example::protocol::types::Host for State {}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     let mut config = Config::new();

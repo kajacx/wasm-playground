@@ -44,7 +44,7 @@
               default(point) {
                 console.log("IN JCO INSTANTIATED IMPORTS", point);
                 point.x = point.x + 100;
-                return point;
+                return Promise.resolve(point);
               },
             },
             print: {
@@ -59,7 +59,7 @@
         let { movePoint, sayHello } = instance;
 
         sayHello();
-        console.log(movePoint({ x: 50, y: 50 }));
+        console.log("MOVE POINT:", movePoint({ x: 50, y: 50 }));
       });
     </script>
   </body>
