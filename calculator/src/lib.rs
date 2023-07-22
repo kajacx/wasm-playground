@@ -9,6 +9,14 @@ wasm_bridge::component::bindgen!({
     world: "calculator",
 });
 
+struct Imports;
+
+impl CalculatorImports for Imports {
+    fn add_one(&mut self, num: i32) -> Result<i32> {
+        Ok(num + 1)
+    }
+}
+
 pub fn calculate_plus_three(number: i32) -> String {
     match add_three(number) {
         Ok(result) => format!("{} + 3 = {}", number, result),
@@ -21,11 +29,12 @@ fn add_three(number: i32) -> Result<i32> {
     config.wasm_component_model(true);
 
     let engine = Engine::new(&config)?;
-    let mut store = Store::new(&engine, ());
+    let mut store = Store::new(&engine, Imports);
 
     let component = Component::new(&store.engine(), COMPONENT_BYTES)?;
 
-    let linker = Linker::new(store.engine());
+    let mut linker = Linker::new(store.engine());
+    Calculator::add_to_linker(&mut linker, |data| data)?;
 
     let (instance, _) = Calculator::instantiate(&mut store, &component, &linker)?;
 

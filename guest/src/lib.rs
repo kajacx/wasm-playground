@@ -7,7 +7,10 @@ struct Impl;
 
 impl Calculator for Impl {
     fn add_three(num: i32) -> i32 {
-        num + 3
+        let num = add_one(num);
+        let num = add_one(num);
+        let num = add_one(num);
+        num
     }
 }
 
