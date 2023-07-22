@@ -5,4 +5,3 @@ edition = "2021"
 
 [dependencies]
 wasm-bridge = { version = "0.2.0", features = ["component-model"] }
-anyhow = "1.0"

@@ -2,7 +2,7 @@ use wasm_bridge::component::*;
 use wasm_bridge::{Config, Engine, Result, Store};
 
 static COMPONENT_BYTES: &'static [u8] =
-    include_bytes!("../../target/wasm32-unknown-unknown/debug/component.wasm");
+    include_bytes!("../../target/wasm32-unknown-unknown/debug/guest.wasm");
 
 wasm_bridge::component::bindgen!({
     path: "../protocol.wit",
