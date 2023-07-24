@@ -73,6 +73,30 @@ impl OutputStream for OutStream {
     }
 }
 
+struct InStream(Vec<u8>, usize);
+
+#[async_trait::async_trait]
+impl InputStream for InStream {
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+
+    async fn readable(&self) -> Result<()> {
+        Ok(())
+    }
+
+    async fn read(&mut self, buf: &mut [u8]) -> Result<(u64, bool)> {
+        let len = buf.len().min(self.0.len() - self.1);
+        (&mut buf[..len]).copy_from_slice(&self.0[self.1..(len + self.1)]);
+        self.1 += len as usize;
+        Ok((len as _, self.1 < self.0.len()))
+    }
+
+    async fn num_ready_bytes(&self) -> Result<u64> {
+        Ok((self.0.len() - self.1) as _)
+    }
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     let mut config = Config::new();
@@ -82,8 +106,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let out_bytes = Arc::new(Mutex::new(Vec::<u8>::new()));
     let out = OutStream(out_bytes.clone());
 
+    let in_ = InStream("Hello world!\n".to_string().into_bytes(), 0);
+
     let mut table = Table::new();
-    let wasi = WasiCtxBuilder::new().set_stdout(out).build(&mut table)?;
+    let wasi = WasiCtxBuilder::new()
+        .set_stdout(out)
+        .set_stdin(in_)
+        .build(&mut table)?;
 
     let engine = Engine::new(&config)?;
     let mut store = Store::new(&engine, State { table, wasi });
@@ -120,6 +149,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
         "BYTES: {:?}",
         std::str::from_utf8(&*out_bytes.try_lock().unwrap())
     );
+
+    println!("LINE: {:?}", my_world.call_read_line(&mut store).await?);
+    println!("LINE: {:?}", my_world.call_read_line(&mut store).await?);
+    println!("LINE: {:?}", my_world.call_read_line(&mut store).await?);
 
     Ok(())
 }

@@ -16,4 +16,7 @@ world my-world {
   import print: func(msg: string)
   // Say "Hello" to stdout, use with wasi
   export say-hello: func()
+
+  // Read line from stdin, use with wasi
+  export read-line: func() -> option<string>
 }

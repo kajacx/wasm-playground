@@ -17,6 +17,13 @@ impl MyWorld for Plugin {
         print("imported print fn");
         println!("Hello from updated (yet again) wasi plugin, will it print?");
     }
+
+    fn read_line() -> Option<String> {
+        std::io::stdin()
+            .lines()
+            .next()
+            .map(|line| line.expect("read line"))
+    }
 }
 
 export_my_world!(Plugin);
