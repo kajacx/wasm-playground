@@ -89,7 +89,7 @@ impl InputStream for InStream {
         let len = buf.len().min(self.0.len() - self.1);
         (&mut buf[..len]).copy_from_slice(&self.0[self.1..(len + self.1)]);
         self.1 += len as usize;
-        Ok((len as _, self.1 < self.0.len()))
+        Ok((len as _, self.1 == self.0.len()))
     }
 
     async fn num_ready_bytes(&self) -> Result<u64> {
