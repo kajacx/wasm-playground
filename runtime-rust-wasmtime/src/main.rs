@@ -97,6 +97,27 @@ impl InputStream for InStream {
     }
 }
 
+struct FakeClock;
+
+impl HostWallClock for FakeClock {
+    fn now(&self) -> std::time::Duration {
+        std::time::Duration::from_secs(0)
+    }
+
+    fn resolution(&self) -> std::time::Duration {
+        std::time::Duration::from_nanos(1)
+    }
+}
+
+impl HostMonotonicClock for FakeClock {
+    fn now(&self) -> u64 {
+        0
+    }
+    fn resolution(&self) -> u64 {
+        1
+    }
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     let mut config = Config::new();
@@ -112,6 +133,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let wasi = WasiCtxBuilder::new()
         .set_stdout(out)
         .set_stdin(in_)
+        .set_wall_clock(FakeClock)
+        // .set_monotonic_clock(FakeClock)
+        // .set_secure_random_to_custom_generator(random)
+        // .set_
+        // .inherit_stdin()
         .build(&mut table)?;
 
     let engine = Engine::new(&config)?;
@@ -124,6 +150,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let component = Component::new(&store.engine(), &component_bytes).expect("create component");
 
     let mut linker = Linker::new(store.engine());
+
+    // linker.
 
     // do NOT use these ...
     // wasi::cli_base::stdin::add_to_linker(&mut linker, |data| data)?;
