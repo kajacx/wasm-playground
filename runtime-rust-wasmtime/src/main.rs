@@ -118,8 +118,8 @@ impl HostMonotonicClock for FakeClock {
     }
 }
 
-// #[tokio::main]
-fn main() -> Result<(), Box<dyn Error>> {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn Error>> {
     let mut config = Config::new();
     config.wasm_component_model(true);
     config.async_support(true);
@@ -159,7 +159,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     // wasi::cli_base::stderr::add_to_linker(&mut linker, |data| data)?;
 
     // Use this instead
-    command::add_to_linker(&mut linker)?;
+    // command::add_to_linker(&mut linker)?;
+    wasi::command::add_to_linker(&mut linker)?;
 
     MyWorld::add_to_linker(&mut linker, |state| state)?;
     let (my_world, _instance) = MyWorld::instantiate_async(&mut store, &component, &linker).await?;
@@ -181,6 +182,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     println!("LINE: {:?}", my_world.call_read_line(&mut store).await?);
     println!("LINE: {:?}", my_world.call_read_line(&mut store).await?);
     println!("LINE: {:?}", my_world.call_read_line(&mut store).await?);
+
+    println!("5 + 3 = {:?}", my_world.call_add_three(&mut store, 5).await);
 
     Ok(())
 }

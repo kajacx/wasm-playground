@@ -19,4 +19,6 @@ world my-world {
 
   // Read line from stdin, use with wasi
   export read-line: func() -> option<string>
+
+  export add-three: func(num: u64) -> u64
 }

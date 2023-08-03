@@ -36,6 +36,10 @@ impl MyWorld for Plugin {
             .next()
             .map(|line| line.expect("read line"))
     }
+
+    fn add_three(num: u64) -> u64 {
+        num + 3
+    }
 }
 
 export_my_world!(Plugin);
