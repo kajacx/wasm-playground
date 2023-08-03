@@ -1,4 +1,7 @@
-use std::error::Error;
+use std::{
+    error::Error,
+    sync::{Arc, Mutex},
+};
 use wasmtime::{
     component::{Component, Linker},
     Config, Engine, Result, Store,
@@ -9,6 +12,7 @@ use wasmtime_wasi::preview2::*;
 wasmtime::component::bindgen!({
     path: "../protocol.wit",
     world: "my-world",
+    async: true,
     with: {
        "wasi:cli-base/stdin": wasi::cli_base::stdin,
        "wasi:cli-base/stdout": wasi::cli_base::stdout,
@@ -36,13 +40,14 @@ impl WasiView for State {
     }
 }
 
+#[async_trait::async_trait]
 impl MyWorldImports for State {
-    fn import_point(&mut self, mut point: Point) -> Result<Point> {
+    async fn import_point(&mut self, mut point: Point) -> Result<Point> {
         point.x += 100;
         Ok(point)
     }
 
-    fn print(&mut self, msg: String) -> Result<()> {
+    async fn print(&mut self, msg: String) -> Result<()> {
         println!("From sys host: {msg}");
         Ok(())
     }
@@ -50,85 +55,88 @@ impl MyWorldImports for State {
 
 impl example::protocol::types::Host for State {}
 
-// struct OutStream(Arc<Mutex<Vec<u8>>>);
+struct OutStream(Arc<Mutex<Vec<u8>>>);
 
-// impl OutputStream for OutStream {
-//     fn as_any(&self) -> &dyn std::any::Any {
-//         self
-//     }
+#[async_trait::async_trait]
+impl OutputStream for OutStream {
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 
-//     fn writable(&self) -> Result<()> {
-//         Ok(())
-//     }
+    async fn writable(&self) -> Result<()> {
+        Ok(())
+    }
 
-//     fn write(&mut self, buf: &[u8]) -> Result<u64> {
-//         self.0.try_lock().unwrap().extend(buf);
-//         Ok(buf.len() as u64)
-//     }
-// }
+    async fn write(&mut self, buf: &[u8]) -> Result<u64> {
+        self.0.try_lock().unwrap().extend(buf);
+        Ok(buf.len() as u64)
+    }
+}
 
-// struct InStream(Vec<u8>, usize);
+struct InStream(Vec<u8>, usize);
 
-// impl InputStream for InStream {
-//     fn as_any(&self) -> &dyn std::any::Any {
-//         self
-//     }
+#[async_trait::async_trait]
+impl InputStream for InStream {
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 
-//     fn readable(&self) -> Result<()> {
-//         Ok(())
-//     }
+    async fn readable(&self) -> Result<()> {
+        Ok(())
+    }
 
-//     fn read(&mut self, buf: &mut [u8]) -> Result<(u64, bool)> {
-//         let len = buf.len().min(self.0.len() - self.1);
-//         (&mut buf[..len]).copy_from_slice(&self.0[self.1..(len + self.1)]);
-//         self.1 += len as usize;
-//         Ok((len as _, self.1 == self.0.len()))
-//     }
+    async fn read(&mut self, buf: &mut [u8]) -> Result<(u64, bool)> {
+        let len = buf.len().min(self.0.len() - self.1);
+        (&mut buf[..len]).copy_from_slice(&self.0[self.1..(len + self.1)]);
+        self.1 += len as usize;
+        Ok((len as _, self.1 == self.0.len()))
+    }
 
-//     fn num_ready_bytes(&self) -> Result<u64> {
-//         Ok((self.0.len() - self.1) as _)
-//     }
-// }
+    async fn num_ready_bytes(&self) -> Result<u64> {
+        Ok((self.0.len() - self.1) as _)
+    }
+}
 
-// struct FakeClock;
+struct FakeClock;
 
-// impl HostWallClock for FakeClock {
-//     fn now(&self) -> std::time::Duration {
-//         std::time::Duration::from_secs(0)
-//     }
+impl HostWallClock for FakeClock {
+    fn now(&self) -> std::time::Duration {
+        std::time::Duration::from_secs(0)
+    }
 
-//     fn resolution(&self) -> std::time::Duration {
-//         std::time::Duration::from_nanos(1)
-//     }
-// }
+    fn resolution(&self) -> std::time::Duration {
+        std::time::Duration::from_nanos(1)
+    }
+}
 
-// impl HostMonotonicClock for FakeClock {
-//     fn now(&self) -> u64 {
-//         0
-//     }
-//     fn resolution(&self) -> u64 {
-//         1
-//     }
-// }
+impl HostMonotonicClock for FakeClock {
+    fn now(&self) -> u64 {
+        0
+    }
+    fn resolution(&self) -> u64 {
+        1
+    }
+}
 
 // #[tokio::main]
 fn main() -> Result<(), Box<dyn Error>> {
     let mut config = Config::new();
     config.wasm_component_model(true);
-    // config.async_support(true);
+    config.async_support(true);
 
-    // let out_bytes = Arc::new(Mutex::new(Vec::<u8>::new()));
-    // let out = OutStream(out_bytes.clone());
+    let out_bytes = Arc::new(Mutex::new(Vec::<u8>::new()));
+    let out = OutStream(out_bytes.clone());
 
-    // let in_ = InStream("Hello world!\n".to_string().into_bytes(), 0);
+    let in_ = InStream("Hello world!\n".to_string().into_bytes(), 0);
 
     let mut table = Table::new();
     let wasi = WasiCtxBuilder::new()
-        // .set_stdout(out)
-        // .set_stdin(in_)
-        // .set_wall_clock(FakeClock)
+        .set_stdout(out)
+        .set_stdin(in_)
+        .set_wall_clock(FakeClock)
         // .set_monotonic_clock(FakeClock)
         // .set_secure_random_to_custom_generator(random)
+        // .set_
         // .inherit_stdin()
         .build(&mut table)?;
 
@@ -151,27 +159,28 @@ fn main() -> Result<(), Box<dyn Error>> {
     // wasi::cli_base::stderr::add_to_linker(&mut linker, |data| data)?;
 
     // Use this instead
-    // command::add_to_linker(&mut linker)?;
-    command::sync::add_to_linker(&mut linker)?;
+    command::add_to_linker(&mut linker)?;
 
     MyWorld::add_to_linker(&mut linker, |state| state)?;
-    let (my_world, _instance) = MyWorld::instantiate(&mut store, &component, &linker)?;
+    let (my_world, _instance) = MyWorld::instantiate_async(&mut store, &component, &linker).await?;
 
     println!(
         "Point: {:?}",
-        my_world.call_move_point(&mut store, Point { x: 50, y: 50 })
+        my_world
+            .call_move_point(&mut store, Point { x: 50, y: 50 })
+            .await
     );
 
-    my_world.call_say_hello(&mut store)?;
+    my_world.call_say_hello(&mut store).await?;
 
-    // println!(
-    //     "BYTES: {:?}",
-    //     std::str::from_utf8(&*out_bytes.try_lock().unwrap())
-    // );
+    println!(
+        "BYTES: {:?}",
+        std::str::from_utf8(&*out_bytes.try_lock().unwrap())
+    );
 
-    // println!("LINE: {:?}", my_world.call_read_line(&mut store)?);
-    // println!("LINE: {:?}", my_world.call_read_line(&mut store)?);
-    // println!("LINE: {:?}", my_world.call_read_line(&mut store)?);
+    println!("LINE: {:?}", my_world.call_read_line(&mut store).await?);
+    println!("LINE: {:?}", my_world.call_read_line(&mut store).await?);
+    println!("LINE: {:?}", my_world.call_read_line(&mut store).await?);
 
     Ok(())
 }
