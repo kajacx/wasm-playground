@@ -1,3 +1,4 @@
+use bytes::Bytes;
 use std::{
     error::Error,
     sync::{Arc, Mutex},
@@ -58,42 +59,66 @@ impl example::protocol::types::Host for State {}
 struct OutStream(Arc<Mutex<Vec<u8>>>);
 
 #[async_trait::async_trait]
-impl OutputStream for OutStream {
-    fn as_any(&self) -> &dyn std::any::Any {
-        self
-    }
+impl HostOutputStream for OutStream {
+    // fn as_any(&self) -> &dyn std::any::Any {
+    //     self
+    // }
 
-    async fn writable(&self) -> Result<()> {
-        Ok(())
-    }
+    // async fn writable(&self) -> Result<()> {
+    // fn writable(&self) -> Result<()> {
+    //     Ok(())
+    // }
 
-    async fn write(&mut self, buf: &[u8]) -> Result<u64> {
+    fn write(&mut self, buf: bytes::Bytes) -> Result<(usize, StreamState)> {
+        let len = buf.len();
         self.0.try_lock().unwrap().extend(buf);
-        Ok(buf.len() as u64)
+        Ok((len, StreamState::Open))
+    }
+
+    async fn ready(&mut self) -> Result<()> {
+        Ok(())
     }
 }
 
 struct InStream(Vec<u8>, usize);
 
 #[async_trait::async_trait]
-impl InputStream for InStream {
-    fn as_any(&self) -> &dyn std::any::Any {
-        self
-    }
+impl HostInputStream for InStream {
+    // fn as_any(&self) -> &dyn std::any::Any {
+    //     self
+    // }
 
-    async fn readable(&self) -> Result<()> {
-        Ok(())
-    }
+    // async fn readable(&self) -> Result<()> {
+    //     Ok(())
+    // }
 
-    async fn read(&mut self, buf: &mut [u8]) -> Result<(u64, bool)> {
-        let len = buf.len().min(self.0.len() - self.1);
-        (&mut buf[..len]).copy_from_slice(&self.0[self.1..(len + self.1)]);
+    // async fn read(&mut self, buf: &mut [u8]) -> Result<(u64, bool)> {
+    //     let len = buf.len().min(self.0.len() - self.1);
+    //     (&mut buf[..len]).copy_from_slice(&self.0[self.1..(len + self.1)]);
+    //     self.1 += len as usize;
+    //     Ok((len as _, self.1 == self.0.len()))
+    // }
+
+    // async fn num_ready_bytes(&self) -> Result<u64> {
+    //     Ok((self.0.len() - self.1) as _)
+    // }
+
+    fn read(&mut self, size: usize) -> Result<(Bytes, StreamState)> {
+        let start = self.1;
+        let len = size.min(self.0.len() - self.1);
         self.1 += len as usize;
-        Ok((len as _, self.1 == self.0.len()))
+        Ok((
+            Bytes::copy_from_slice(&self.0[start..start + len]),
+            if start + len < self.0.len() {
+                StreamState::Open
+            } else {
+                StreamState::Closed
+            },
+        ))
     }
 
-    async fn num_ready_bytes(&self) -> Result<u64> {
-        Ok((self.0.len() - self.1) as _)
+    async fn ready(&mut self) -> Result<()> {
+        Ok(())
     }
 }
 
@@ -160,7 +185,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // Use this instead
     // command::add_to_linker(&mut linker)?;
-    wasi::command::add_to_linker(&mut linker)?;
+    command::add_to_linker(&mut linker)?;
 
     MyWorld::add_to_linker(&mut linker, |state| state)?;
     let (my_world, _instance) = MyWorld::instantiate_async(&mut store, &component, &linker).await?;
