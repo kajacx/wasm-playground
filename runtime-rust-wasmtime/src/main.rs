@@ -111,8 +111,8 @@ impl example::protocol::types::Host for State {}
 //     }
 // }
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
+// #[tokio::main]
+fn main() -> Result<(), Box<dyn Error>> {
     let mut config = Config::new();
     config.wasm_component_model(true);
     // config.async_support(true);
@@ -151,7 +151,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // wasi::cli_base::stderr::add_to_linker(&mut linker, |data| data)?;
 
     // Use this instead
-    command::add_to_linker(&mut linker)?;
+    // command::add_to_linker(&mut linker)?;
+    command::sync::add_to_linker(&mut linker)?;
 
     MyWorld::add_to_linker(&mut linker, |state| state)?;
     let (my_world, _instance) = MyWorld::instantiate(&mut store, &component, &linker)?;
