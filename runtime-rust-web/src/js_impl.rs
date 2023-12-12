@@ -47,7 +47,18 @@ pub async fn instantiate(import_point: impl Fn(Point) -> Point + 'static) -> Ins
     )
     .expect("eval compile core");
 
-    let print = js_sys::eval("console.log").unwrap();
+    let print: Function = js_sys::eval("console.log").unwrap().into();
+
+    print
+        .call1(JsValue::UNDEFINED, "let's do something stupid".into())
+        .unwrap();
+
+    let resolve = async { 50 };
+    let as_js: JsValue = js_sys::prom;
+
+    print
+        .call1(JsValue::UNDEFINED, "let's do something stupid".into())
+        .unwrap();
 
     let import_point = Closure::<dyn Fn(JsValue) -> JsValue>::new(move |point: JsValue| {
         let point = point_from_js_value(&point);
