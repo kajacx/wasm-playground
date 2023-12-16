@@ -1,6 +1,16 @@
 package component:guest-reactor;
 
+
+
 /// An example world for the component to target.
 world example {
+  variant shape {
+    circle(float32),
+    rectangle(tuple<float32, float32>),
+    semi-circle(tuple<float32, float32>),
+    point
+  }
+
     export hello-world: func() -> string;
+    export double-shape: func(input: shape) -> shape;
 }

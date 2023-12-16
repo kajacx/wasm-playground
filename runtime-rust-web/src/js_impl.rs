@@ -50,7 +50,7 @@ pub async fn instantiate(import_point: impl Fn(Point) -> Point + 'static) -> Ins
     let print: Function = js_sys::eval("console.log").unwrap().into();
 
     print
-        .call1(JsValue::UNDEFINED, "let's do something stupid".into())
+        .call1(&JsValue::UNDEFINED, "let's do something stupid".into())
         .unwrap();
 
     let resolve = async { 50 };
