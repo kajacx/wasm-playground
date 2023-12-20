@@ -1,5 +1,5 @@
 [package]
-name = "guest-reactor"
+name = "guest-exports"
 version = "0.1.0"
 edition = "2021"
 
@@ -13,6 +13,6 @@ wit-bindgen = "0.14.0"
 crate-type = ["cdylib"]
 
 [package.metadata.component]
-package = "component:guest-reactor"
+package = "component:guest-exports"
 
 [package.metadata.component.dependencies]

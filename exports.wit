@@ -1,0 +1,45 @@
+package component:guest-reactor;
+
+/// An example world for the component to target.
+world example {
+    record data {
+        u: s8,
+        x: s32,
+        y: u8,
+        z: s16,
+        zz: u8,
+        w: string,
+    }
+
+    export data-export: func(d: data) -> data;
+    export insane-data-export: func(d: data, x: string, y: s32, z: data) -> data;
+
+    export data-list-export: func(d: list<data>) -> list<data>;
+    export data-deep-export: func(d: list<list<data>>) -> list<list<data>>;
+
+    export s16-export: func(d: list<s16>) -> list<s16>;
+    export u32-export: func(d: u32) -> u32;
+
+    export push-s32s: func(nums: list<s32>, a: s32, b: s32) -> list<s32>;
+    export push-u32s: func(nums: list<u32>, a: u32, b: u32) -> list<u32>;
+
+    export voider: func();
+    export pairs: func() -> (a: s32, b: s32);
+    export small-pairs: func() -> (a: s16, b: s16);
+
+    export int-to-string: func(i: s32) -> string;
+    export big-int: func(i: s64) -> s64;
+
+    record ab {
+        a: s32,
+        b: s16,
+    }
+    export get-ab: func() -> (val: ab, additional: s16);
+    export get-ab-list: func() -> list<tuple<ab,s16>>;
+
+    record abc {
+        val: ab,
+        c: s16,
+    }
+    export get-abc-list: func() -> list<abc>;
+}

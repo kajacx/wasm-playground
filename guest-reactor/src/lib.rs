@@ -1,19 +1,28 @@
-cargo_component_bindings::generate!();
-
-use bindings::{Guest, Shape};
+wit_bindgen::generate!({
+    path: "../world.wit",
+    world: "example",
+    exports: {
+        world: Component,
+    }
+});
 
 struct Component;
 
 impl Guest for Component {
-    /// Say hello!
-    fn hello_world() -> String {
-        "Hello, World!".to_string()
+    fn data_export(d: Data) -> Data {
+        data_import(&d)
     }
 
-    fn double_shape(input: Shape) -> Shape {
-        match input {
-            Shape::Circle(r) => Shape::Circle(r * 2.0),
-            _ => Shape::Point,
-        }
+    fn data_list_export(d: Vec<Data>) -> Vec<Data> {
+        data_list_import(&d)
+    }
+
+    fn data_deep_export(d: Vec<Vec<Data>>) -> Vec<Vec<Data>> {
+        // let d: Vec<&[Data]> = d.iter().map(Vec::as_ref).collect();
+        data_deep_import(&d)
+    }
+
+    fn s16_export(d: Vec<i16>) -> Vec<i16> {
+        s16_import(&d)
     }
 }

@@ -2,5 +2,23 @@ package component:guest-reactor;
 
 /// An example world for the component to target.
 world example {
-    export hello-world: func() -> string;
+    record data {
+        x: s32,
+        y: u8,
+        z: s16,
+        zz: u8,
+        w: string,
+    }
+
+    export data-export: func(d: data) -> data;
+    import data-import: func(d: data) -> data;
+
+    export data-list-export: func(d: list<data>) -> list<data>;
+    import data-list-import: func(d: list<data>) -> list<data>;
+
+    export data-deep-export: func(d: list<list<data>>) -> list<list<data>>;
+    import data-deep-import: func(d: list<list<data>>) -> list<list<data>>;
+
+    export s16-export: func(d: list<s16>) -> list<s16>;
+    import s16-import: func(d: list<s16>) -> list<s16>;
 }
