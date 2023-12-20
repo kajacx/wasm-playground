@@ -9,69 +9,47 @@ wit_bindgen::generate!({
 struct Component;
 
 impl Guest for Component {
-    fn data_export(d: Data) -> Data {
-        d
-    }
-
-    fn insane_data_export(d: Data, _: String, _: i32, _: Data) -> Data {
-        d
-    }
-
-    fn data_list_export(d: Vec<Data>) -> Vec<Data> {
-        d
-    }
-
-    fn data_deep_export(d: Vec<Vec<Data>>) -> Vec<Vec<Data>> {
-        d
-    }
-
-    fn s16_export(d: Vec<i16>) -> Vec<i16> {
-        d
-    }
-
-    fn u32_export(d: u32) -> u32 {
-        d
-    }
-
-    fn push_s32s(mut numbers: Vec<i32>, a: i32, b: i32) -> Vec<i32> {
-        numbers.push(a);
-        numbers.push(b);
-        numbers
-    }
-
-    fn push_u32s(mut numbers: Vec<u32>, a: u32, b: u32) -> Vec<u32> {
-        numbers.push(a);
-        numbers.push(b);
-        numbers
-    }
-
-    fn voider() {}
-
-    fn pairs() -> (i32, i32) {
-        (0, 1)
-    }
-
-    fn small_pairs() -> (i16, i16) {
-        (0, 1)
-    }
-
-    fn int_to_string(i: i32) -> String {
-        i.to_string()
-    }
-
-    fn big_int(i: i64) -> i64 {
-        i
-    }
-
-    fn get_ab() -> (Ab, i16) {
+    fn xy_export(_d: Xy) -> Xy {
         todo!()
     }
 
-    fn get_ab_list() -> Vec<(Ab, i16)> {
+    fn xy_export_tuple(_d: (Xy, Xy)) -> (Xy, Xy) {
         todo!()
     }
 
-    fn get_abc_list() -> Vec<Abc> {
+    fn xy_export_pair(_d: Xy, _e: Xy) -> (Xy, Xy) {
+        todo!()
+    }
+
+    fn xy_export_list(_d: Vec<Xy>) -> Vec<Xy> {
+        todo!()
+    }
+
+    fn xyz_export(_d: Xyz) -> Xyz {
+        todo!()
+    }
+
+    fn xyz_export_tuple(_d: (Xyz, Xyz)) -> (Xyz, Xyz) {
+        todo!()
+    }
+
+    fn xyz_export_pair(_d: Xyz, _e: Xyz) -> (Xyz, Xyz) {
+        todo!()
+    }
+
+    fn xyz_export_list(_d: Vec<Xyz>) -> Vec<Xyz> {
+        todo!()
+    }
+
+    fn void_args_s32() -> i32 {
+        todo!()
+    }
+
+    fn void_ret_s32(_d: i32) {
+        todo!()
+    }
+
+    fn void_both() {
         todo!()
     }
 }
