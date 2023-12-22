@@ -1,0 +1,16 @@
+[package]
+name = "bevy-host"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bevy = "0.12.1"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+wasm_runtime_layer = { version = "0.2.0", features = ["backend_wasmtime"] }
+wasmtime = { version = "16.0", default-features = false }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm_runtime_layer = { version = "0.2.0", features = ["backend_web"] }
