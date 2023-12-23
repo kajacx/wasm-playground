@@ -7,7 +7,7 @@
   </head>
   <body>
     <script type="module">
-      import("./out-dir/component.js").then(async (module) => {
+      import("./out-dir/guest_exports.js").then(async (module) => {
         let instantiate = () =>
           module.instantiate(
             async (url, imports) => {
@@ -15,51 +15,40 @@
               return WebAssembly.compile(await data.arrayBuffer(), imports);
             },
             {
-              print: { default: console.log },
-              ["import-point"]: {
-                default: (point) => {
-                  point.x += 100;
-                  return point;
+              ["import-vector-round"]: {
+                default: (vector) => {
+                  return vector;
                 },
               },
-              ["example:protocol/host-imports"]: {
-                printLine: console.log,
+              ["import-vector-list"]: {
+                default: (list) => {
+                  return list;
+                },
               },
-              ["inline-imports"]: {
-                addOne: (num) => num + 1,
+              ["import-s32"]: {
+                default: (s) => {
+                  return s;
+                },
               },
-              // cSpell::disable-next-line
-              singlewordimports: {
-                subOne: (num) => num - 1,
+              ["import-string"]: {
+                default: (s) => {
+                  return s;
+                },
+              },
+              ["import-insane"]: {
+                default: (i) => {
+                  i[0].x = 100;
+                  return i;
+                },
               },
             }
           );
 
         let instance1 = await instantiate();
-        console.log(instance1.movePoint({ x: 50, y: 50 }));
-
-        instance1["example:protocol/guest-exports"].run();
-
-        console.log(
-          "5 + 3 =",
-          // instance1["inline-exports"].addThree(5) TS bindings wrong again
-          instance1.inlineExports.addThree(5)
-        );
-
-        console.log(
-          "5 - 3 =",
-          // cSpell::disable-next-line
-          instance1.singlewordexports.subThree(5)
-        );
-
-        let instance2 = await instantiate();
-
-        console.log("instance 1:", instance1.increment());
-        console.log("instance 1:", instance1.increment());
-        console.log("instance 2:", instance2.increment());
-        console.log("instance 1:", instance1.increment());
-        console.log("instance 2:", instance2.increment());
-        console.log("instance 1:", instance1.increment());
+        let vec = { x: 50, y: 60, z: 70 };
+        console.log(instance1.exportVectorRound(vec));
+        console.log(instance1.exportVectorList([vec, vec]));
+        console.log(instance1.exportInsane([vec, vec, vec, vec, vec, vec]));
       });
     </script>
   </body>
