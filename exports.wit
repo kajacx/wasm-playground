@@ -3,8 +3,9 @@ package component:guest-reactor;
 /// An example world for the component to target.
 world example {
     record xy {
-        x: s32,
-        y: s16,
+        x: s16,
+      //  xx: s8,
+      //  y: s32,
     }
 
     record xyz {
@@ -25,4 +26,65 @@ world example {
     export void-args-s32: func() -> s32;
     export void-ret-s32: func(d: s32);
     export void-both: func();
+
+    record point16 {
+        x: s16,
+        y: s16,
+        z: s16,
+    }
+
+    export points: func(d: list<point16>) -> list<point16>;
+
+    record point-more {
+        point: point16,
+        more: s32,
+    }
+
+    export points-more: func(d: list<point-more>) -> list<point-more>;
+
+    record triple1 {
+    x: u8,
+    y: u16,
+    
+    }
+
+    record triple2 {
+    x: u16,
+    y: u16,
+    z: u16,
+    }
+
+    record point-final {
+    start: s16,
+    t2: tuple<s16, s16, s16>,
+    
+    }
+
+    export points-final: func(d: list<point-final>) -> list<point-final>;
+
+    record vector {
+        x: s32,
+        y: s32,
+        z: s32,
+    }
+   
+    record player {
+        position: vector,
+        velocity: vector,
+        looking-at: vector,
+        health: u32,
+        max-health: u32,
+    }
+   
+    export player-look-at: func(player: player, look: player ) -> player;
+
+    export char-round: func(c: char) -> char;
+    export char-list: func(c: list<char>) -> list<char>;
+
+    export bool-round: func(c: bool) -> bool;
+    export bool-list: func(c: list<bool>) -> list<bool>;
+
+    import import-s32: func(i: s32) -> s32;
+    import import-vector-arg: func(i : vector);
+    import import-vector-res: func() -> vector;
 }

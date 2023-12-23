@@ -52,4 +52,39 @@ impl Guest for Component {
     fn void_both() {
         todo!()
     }
+
+    fn points(_d: Vec<Point16>) -> Vec<Point16> {
+        todo!()
+    }
+
+    fn points_more(_d: Vec<PointMore>) -> Vec<PointMore> {
+        todo!()
+    }
+
+    fn points_final(_d: Vec<PointFinal>) -> Vec<PointFinal> {
+        todo!()
+    }
+
+    fn player_look_at(_p: Player, _l: Player) -> Player {
+        todo!()
+    }
+
+    fn char_round(_c: char) -> char {
+        todo!()
+    }
+
+    fn char_list(_c: Vec<char>) -> Vec<char> {
+        todo!()
+    }
+
+    fn bool_round(_c: bool) -> bool {
+        todo!()
+    }
+
+    fn bool_list(_c: Vec<bool>) -> Vec<bool> {
+        let _ = import_s32(5);
+        import_vector_arg(Vector { x: 1, y: 2, z: 3 });
+        let _ = import_vector_res();
+        todo!()
+    }
 }
