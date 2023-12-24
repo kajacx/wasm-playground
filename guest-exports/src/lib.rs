@@ -21,13 +21,31 @@ impl Guest for Component {
         import_s32(s)
     }
 
+    fn export_char(c: char) -> char {
+        import_char(c)
+    }
+
+    fn export_char_list(c: Vec<char>) -> Vec<char> {
+        import_char_list(&c)
+    }
+
     fn export_string(s: String) -> String {
         import_string(&s)
+    }
+
+    fn export_less_insane(
+        i: (Vector, Vector, Vector, Vector, Vector),
+    ) -> (Vector, Vector, Vector, Vector, Vector) {
+        import_less_insane(i)
     }
 
     fn export_insane(
         i: (Vector, Vector, Vector, Vector, Vector, Vector),
     ) -> (Vector, Vector, Vector, Vector, Vector, Vector) {
         import_insane(i)
+    }
+
+    fn export_empty(e: Empty) -> Empty {
+        import_empty(e)
     }
 }

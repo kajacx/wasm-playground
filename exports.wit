@@ -17,10 +17,26 @@ world example {
     import import-s32: func(s: s32) -> s32;
     export export-s32: func(s: s32) -> s32;
 
+    import import-char: func(s: char) -> char;
+    export export-char: func(s: char) -> char;
+
+    import import-char-list: func(s: list<char>) -> list<char>;
+    export export-char-list: func(s: list<char>) -> list<char>;
+
     import import-string: func(s: string) -> string;
     export export-string: func(s: string) -> string;
+
+    import import-less-insane: func(i: tuple<vector, vector, vector, vector, vector>) -> tuple<vector, vector, vector, vector, vector>;
+    export export-less-insane: func(i: tuple<vector, vector, vector, vector, vector>) -> tuple<vector, vector, vector, vector, vector>;
 
     import import-insane: func(i: tuple<vector, vector, vector, vector, vector, vector>) -> tuple<vector, vector, vector, vector, vector, vector>;
     export export-insane: func(i: tuple<vector, vector, vector, vector, vector, vector>) -> tuple<vector, vector, vector, vector, vector, vector>;
     
+    enum empty {
+        a
+    }
+
+    import import-empty: func(e: empty) -> empty;
+    export export-empty: func(e: empty) -> empty;
+
 }

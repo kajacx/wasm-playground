@@ -17,6 +17,7 @@
             {
               ["import-vector-round"]: {
                 default: (vector) => {
+                  vector.z = 200;
                   return vector;
                 },
               },
@@ -32,7 +33,7 @@
               },
               ["import-string"]: {
                 default: (s) => {
-                  return s;
+                  return s + "fpp";
                 },
               },
               ["import-insane"]: {
@@ -48,6 +49,7 @@
         let vec = { x: 50, y: 60, z: 70 };
         console.log(instance1.exportVectorRound(vec));
         console.log(instance1.exportVectorList([vec, vec]));
+        console.log(instance1.exportString("hello"));
         console.log(instance1.exportInsane([vec, vec, vec, vec, vec, vec]));
       });
     </script>
