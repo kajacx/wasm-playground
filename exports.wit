@@ -2,26 +2,22 @@ package component:guest-reactor;
 
 /// An example world for the component to target.
 world example {
-    variant partial {
-        zero,
-        two(string),
-        one(u32),
+    record single {
+        a: u16
     }
 
-    variant empty {
-        a,
-        b,
-    }
-
-    import import-partial: func(p: partial) -> partial;
-    export export-partial: func(p: partial) -> partial;
+    import import-single: func(p: single) -> single;
+    export export-single: func(p: single) -> single;
                          
-    import import-partial-list: func(p: list<partial>) -> list<partial>;
-    export export-partial-list: func(p: list<partial>) -> list<partial>;
+    import import-single-list: func(p: list<single>) -> list<single>;
+    export export-single-list: func(p: list<single>) -> list<single>;
 
-    import import-empty: func(p: empty) -> empty;
-    export export-empty: func(p: empty) -> empty;
-                         
-    import import-empty-list: func(p: list<empty>) -> list<empty>;
-    export export-empty-list: func(p: list<empty>) -> list<empty>;
+    import import-result: func(p: result<single, string>) -> result<single, string>;
+    export export-result: func(p: result<single, string>) -> result<single, string>;
+                  
+    import import-result-list: func(p: list<result<single, string>>) -> list<result<single, string>>;
+    export export-result-list: func(p: list<result<single, string>>) -> list<result<single, string>>;
+
+    
+    export mby: func(p: option<single>) -> option<single>;
 }
