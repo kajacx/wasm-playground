@@ -17,15 +17,11 @@ impl Guest for Component {
         import_empty_list(&e)
     }
 
-    fn export_mby_u32(e: Option<u32>) -> Option<u32> {
-        import_mby_u32(e)
+    fn export_partial(e: Partial) -> Partial {
+        import_partial(&e)
     }
 
-    fn export_mby_list(e: Vec<Option<u32>>) -> Vec<Option<u32>> {
-        import_mby_list(&e)
-    }
-
-    fn export_mby_string(e: Option<String>) -> Option<String> {
-        import_mby_string(e.as_deref())
+    fn export_partial_list(e: Vec<Partial>) -> Vec<Partial> {
+        import_partial_list(&e)
     }
 }
