@@ -15,42 +15,35 @@
               return WebAssembly.compile(await data.arrayBuffer(), imports);
             },
             {
-              ["import-vector-round"]: {
-                default: (vector) => {
-                  vector.z = 200;
-                  return vector;
+              ["import-empty"]: {
+                default: (value) => {
+                  return value;
                 },
               },
-              ["import-vector-list"]: {
+              ["import-empty-list"]: {
                 default: (list) => {
-                  return list;
-                },
-              },
-              ["import-s32"]: {
-                default: (s) => {
-                  return s;
-                },
-              },
-              ["import-string"]: {
-                default: (s) => {
-                  return s + "fpp";
-                },
-              },
-              ["import-insane"]: {
-                default: (i) => {
-                  i[0].x = 100;
-                  return i;
+                  return list.map((val) => {
+                    switch (val) {
+                      case "a000":
+                        return "a001";
+                      case "a001":
+                        return "a000";
+                      case "a255":
+                        return "a256";
+                      case "a256":
+                        return "a255";
+                      default:
+                        return val;
+                    }
+                  });
                 },
               },
             }
           );
 
         let instance1 = await instantiate();
-        let vec = { x: 50, y: 60, z: 70 };
-        console.log(instance1.exportVectorRound(vec));
-        console.log(instance1.exportVectorList([vec, vec]));
-        console.log(instance1.exportString("hello"));
-        console.log(instance1.exportInsane([vec, vec, vec, vec, vec, vec]));
+        let list = ["a000", "a001", "a002", "a256", "a255", "a254"];
+        console.log(list, instance1.exportEmptyList(list));
       });
     </script>
   </body>
