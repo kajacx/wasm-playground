@@ -9,23 +9,11 @@ wit_bindgen::generate!({
 struct Component;
 
 impl Guest for Component {
-    fn export_single(e: Single) -> Single {
-        import_single(e)
+    fn export_single(e: Matrix, a: u32) -> Matrix {
+        import_single(e, a)
     }
 
-    fn export_single_list(e: Vec<Single>) -> Vec<Single> {
+    fn export_single_list(e: Vec<Matrix>) -> Vec<Matrix> {
         import_single_list(&e)
-    }
-
-    fn export_result(_e: Result<Single, String>) -> Result<Single, String> {
-        import_result(todo!())
-    }
-
-    fn export_result_list(e: Vec<Result<Single, String>>) -> Vec<Result<Single, String>> {
-        import_result_list(&e)
-    }
-
-    fn mby(e: Option<Single>) -> Option<Single> {
-        e
     }
 }

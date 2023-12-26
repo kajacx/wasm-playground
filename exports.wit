@@ -2,22 +2,24 @@ package component:guest-reactor;
 
 /// An example world for the component to target.
 world example {
-    record single {
-        a: u16
+    record vector {
+        x: float32,
+        y: float32,
+        z: float32,
+        w: float32,
     }
 
-    import import-single: func(p: single) -> single;
-    export export-single: func(p: single) -> single;
+    record matrix {
+        a: vector,
+        b: vector,
+        c: vector,
+        d: vector,
+    }
+
+    import import-single: func(p: matrix, a: u32) -> matrix;
+    export export-single: func(p: matrix, a: u32) -> matrix;
                          
-    import import-single-list: func(p: list<single>) -> list<single>;
-    export export-single-list: func(p: list<single>) -> list<single>;
+    import import-single-list: func(p: list<matrix>) -> list<matrix>;
+    export export-single-list: func(p: list<matrix>) -> list<matrix>;
 
-    import import-result: func(p: result<single, string>) -> result<single, string>;
-    export export-result: func(p: result<single, string>) -> result<single, string>;
-                  
-    import import-result-list: func(p: list<result<single, string>>) -> list<result<single, string>>;
-    export export-result-list: func(p: list<result<single, string>>) -> list<result<single, string>>;
-
-    
-    export mby: func(p: option<single>) -> option<single>;
 }
