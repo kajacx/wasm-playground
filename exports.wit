@@ -6,14 +6,13 @@ world example {
         x: float32,
         y: float32,
         z: float32,
-        w: float32,
     }
 
     record matrix {
-        a: vector,
-        b: vector,
-        c: vector,
-        d: vector,
+        name: string,
+        health: u64,
+        position: vector,
+        velocity: vector,
     }
 
     import import-single: func(p: matrix, a: u32) -> matrix;

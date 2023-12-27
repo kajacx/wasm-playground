@@ -10,7 +10,7 @@ struct Component;
 
 impl Guest for Component {
     fn export_single(e: Matrix, a: u32) -> Matrix {
-        import_single(e, a)
+        import_single(&e, a)
     }
 
     fn export_single_list(e: Vec<Matrix>) -> Vec<Matrix> {
