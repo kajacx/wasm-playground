@@ -1,24 +1,22 @@
 package component:guest-reactor;
 
+interface host-add {
+  add-one: func(num: s32) -> s32;
+}
+
+interface guest-add {
+  add-three: func(num: s32) -> s32;
+}
+
 /// An example world for the component to target.
 world example {
-    record vector {
-        x: float32,
-        y: float32,
-        z: float32,
-    }
+  import host-add;
+  export guest-add;
 
-    record matrix {
-        name: string,
-        health: u64,
-        position: vector,
-        velocity: vector,
-    }
-
-    import import-single: func(p: matrix, a: u32) -> matrix;
-    export export-single: func(p: matrix, a: u32) -> matrix;
-                         
-    import import-single-list: func(p: list<matrix>) -> list<matrix>;
-    export export-single-list: func(p: list<matrix>) -> list<matrix>;
-
+  import host-sub: interface {
+    sub-one: func(num: s32) -> s32;
+  }
+  export guest-sub: interface {
+    sub-three: func(num: s32) -> s32;
+  }
 }
