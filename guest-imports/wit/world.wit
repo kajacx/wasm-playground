@@ -1,0 +1,7 @@
+package component:guest-imports;
+
+/// An example world for the component to target.
+world example {
+    import hello-import: func() -> string;
+    export hello-world: func() -> string;
+}
