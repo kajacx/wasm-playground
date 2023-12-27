@@ -56,70 +56,70 @@ impl MyWorldImports for State {
 
 impl example::protocol::types::Host for State {}
 
+#[derive(Debug, Clone)]
 struct OutStream(Arc<Mutex<Vec<u8>>>);
 
 #[async_trait::async_trait]
-impl HostOutputStream for OutStream {
-    // fn as_any(&self) -> &dyn std::any::Any {
-    //     self
-    // }
-
-    // async fn writable(&self) -> Result<()> {
-    // fn writable(&self) -> Result<()> {
-    //     Ok(())
-    // }
-
-    fn write(&mut self, buf: bytes::Bytes) -> Result<(usize, StreamState)> {
-        let len = buf.len();
-        self.0.try_lock().unwrap().extend(buf);
-        Ok((len, StreamState::Open))
-    }
-
-    async fn ready(&mut self) -> Result<()> {
-        Ok(())
+impl Subscribe for OutStream {
+    async fn ready(&mut self) {
     }
 }
 
+impl HostOutputStream for OutStream {
+    fn write(&mut self, buf: bytes::Bytes) -> StreamResult<()> {
+        let len = buf.len();
+        self.0.try_lock().unwrap().extend(buf);
+        StreamResult::Ok(())
+    }
+
+    fn flush(&mut self) -> StreamResult<()> {
+        StreamResult::Ok(())
+    }
+
+    fn check_write(&mut self) -> StreamResult<usize> {
+        StreamResult::Ok(usize::MAX)
+    }
+
+}
+
+impl StdoutStream for OutStream {
+    fn stream(&self) -> Box<(dyn wasmtime_wasi::preview2::HostOutputStream + 'static)> {
+        Box::new((*self).clone()) // TODO: this is probably wrong
+    }
+
+fn isatty(&self) -> bool { false }
+}
+
+#[derive(Debug, Clone)]
 struct InStream(Vec<u8>, usize);
 
 #[async_trait::async_trait]
+impl Subscribe for InStream {
+    async fn ready(&mut self)  {
+           }
+}
+
+// NOT NEEDED?
 impl HostInputStream for InStream {
-    // fn as_any(&self) -> &dyn std::any::Any {
-    //     self
-    // }
-
-    // async fn readable(&self) -> Result<()> {
-    //     Ok(())
-    // }
-
-    // async fn read(&mut self, buf: &mut [u8]) -> Result<(u64, bool)> {
-    //     let len = buf.len().min(self.0.len() - self.1);
-    //     (&mut buf[..len]).copy_from_slice(&self.0[self.1..(len + self.1)]);
-    //     self.1 += len as usize;
-    //     Ok((len as _, self.1 == self.0.len()))
-    // }
-
-    // async fn num_ready_bytes(&self) -> Result<u64> {
-    //     Ok((self.0.len() - self.1) as _)
-    // }
-
-    fn read(&mut self, size: usize) -> Result<(Bytes, StreamState)> {
+    fn read(&mut self, size: usize) -> StreamResult<Bytes> {
         let start = self.1;
         let len = size.min(self.0.len() - self.1);
         self.1 += len as usize;
-        Ok((
-            Bytes::copy_from_slice(&self.0[start..start + len]),
-            if start + len < self.0.len() {
-                StreamState::Open
-            } else {
-                StreamState::Closed
-            },
-        ))
+        if size > 0 && len == 0 {
+            StreamResult::Err(StreamError::Closed)
+        } else {
+        StreamResult::Ok(
+            Bytes::copy_from_slice(&self.0[start..start + len])
+        )}
+    }
+}
+
+impl StdinStream for InStream {
+    fn stream(&self) -> Box<(dyn wasmtime_wasi::preview2::HostInputStream + 'static)> {
+        Box::new((*self).clone()) // TODO: this is probably wrong
     }
 
-    async fn ready(&mut self) -> Result<()> {
-        Ok(())
-    }
+fn isatty(&self) -> bool { false }
 }
 
 struct FakeClock;
@@ -156,14 +156,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let mut table = Table::new();
     let wasi = WasiCtxBuilder::new()
-        .set_stdout(out)
-        .set_stdin(in_)
-        .set_wall_clock(FakeClock)
+        .stdout(out)
+        .stdin(in_)
+        .wall_clock(FakeClock)
         // .set_monotonic_clock(FakeClock)
         // .set_secure_random_to_custom_generator(random)
         // .set_
         // .inherit_stdin()
-        .build(&mut table)?;
+        .build();
 
     let engine = Engine::new(&config)?;
     let mut store = Store::new(&engine, State { table, wasi });

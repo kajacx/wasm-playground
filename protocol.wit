@@ -1,4 +1,4 @@
-package example:protocol
+package example:protocol;
 
 interface types {
   record point {
@@ -8,17 +8,17 @@ interface types {
 }
 
 world my-world {
-  use types.{point}
+  use types.{point};
 
-  import import-point: func(pnt: point) -> point
-  export move-point: func(pnt: point) -> point
+  import import-point: func(pnt: point) -> point;
+  export move-point: func(pnt: point) -> point;
 
-  import print: func(msg: string)
+  import print: func(msg: string);
   // Say "Hello" to stdout, use with wasi
-  export say-hello: func()
+  export say-hello: func();
 
   // Read line from stdin, use with wasi
-  export read-line: func() -> option<string>
+  export read-line: func() -> option<string>;
 
-  export add-three: func(num: u64) -> u64
+  export add-three: func(num: u64) -> u64;
 }

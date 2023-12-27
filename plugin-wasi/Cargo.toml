@@ -12,5 +12,5 @@ package = "component:plugin-wasi"
 [package.metadata.component.dependencies]
 
 [dependencies]
-wit-bindgen = { version = "0.8.0" }
+wit-bindgen = { version = "0.14.0" }
 rand = "*"

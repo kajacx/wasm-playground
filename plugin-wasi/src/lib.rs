@@ -3,11 +3,14 @@ use rand::Rng;
 wit_bindgen::generate!({
     path: "../protocol.wit",
     world: "my-world",
+    exports: {
+        world: Plugin
+    }
 });
 
 struct Plugin;
 
-impl MyWorld for Plugin {
+impl Guest for Plugin {
     fn move_point(mut point: Point) -> Point {
         rand::thread_rng().gen::<u64>();
         point = import_point(point);
@@ -41,5 +44,3 @@ impl MyWorld for Plugin {
         num + 3
     }
 }
-
-export_my_world!(Plugin);
