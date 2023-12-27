@@ -14,11 +14,6 @@ wasmtime::component::bindgen!({
     path: "../protocol.wit",
     world: "my-world",
     async: true,
-    with: {
-       "wasi:cli-base/stdin": wasi::cli_base::stdin,
-       "wasi:cli-base/stdout": wasi::cli_base::stdout,
-       "wasi:cli-base/stderr": wasi::cli_base::stderr,
-    }
 });
 
 struct State {
@@ -41,19 +36,6 @@ impl WasiView for State {
     }
 }
 
-#[async_trait::async_trait]
-impl MyWorldImports for State {
-    async fn import_point(&mut self, mut point: Point) -> Result<Point> {
-        point.x += 100;
-        Ok(point)
-    }
-
-    async fn print(&mut self, msg: String) -> Result<()> {
-        println!("From sys host: {msg}");
-        Ok(())
-    }
-}
-
 impl example::protocol::types::Host for State {}
 
 #[derive(Debug, Clone)]
@@ -61,8 +43,7 @@ struct OutStream(Arc<Mutex<Vec<u8>>>);
 
 #[async_trait::async_trait]
 impl Subscribe for OutStream {
-    async fn ready(&mut self) {
-    }
+    async fn ready(&mut self) {}
 }
 
 impl HostOutputStream for OutStream {
@@ -79,7 +60,6 @@ impl HostOutputStream for OutStream {
     fn check_write(&mut self) -> StreamResult<usize> {
         StreamResult::Ok(usize::MAX)
     }
-
 }
 
 impl StdoutStream for OutStream {
@@ -87,7 +67,9 @@ impl StdoutStream for OutStream {
         Box::new((*self).clone()) // TODO: this is probably wrong
     }
 
-fn isatty(&self) -> bool { false }
+    fn isatty(&self) -> bool {
+        false
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -95,8 +77,7 @@ struct InStream(Vec<u8>, usize);
 
 #[async_trait::async_trait]
 impl Subscribe for InStream {
-    async fn ready(&mut self)  {
-           }
+    async fn ready(&mut self) {}
 }
 
 // NOT NEEDED?
@@ -108,9 +89,8 @@ impl HostInputStream for InStream {
         if size > 0 && len == 0 {
             StreamResult::Err(StreamError::Closed)
         } else {
-        StreamResult::Ok(
-            Bytes::copy_from_slice(&self.0[start..start + len])
-        )}
+            StreamResult::Ok(Bytes::copy_from_slice(&self.0[start..start + len]))
+        }
     }
 }
 
@@ -119,7 +99,9 @@ impl StdinStream for InStream {
         Box::new((*self).clone()) // TODO: this is probably wrong
     }
 
-fn isatty(&self) -> bool { false }
+    fn isatty(&self) -> bool {
+        false
+    }
 }
 
 struct FakeClock;
@@ -154,11 +136,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let in_ = InStream("Hello world!\n".to_string().into_bytes(), 0);
 
-    let mut table = Table::new();
+    let table = Table::new();
     let wasi = WasiCtxBuilder::new()
-        .stdout(out)
-        .stdin(in_)
-        .wall_clock(FakeClock)
+        // .stdout(out)
+        // .stdin(in_)
+        // .wall_clock(FakeClock)
+        // .secure_random(random)
         // .set_monotonic_clock(FakeClock)
         // .set_secure_random_to_custom_generator(random)
         // .set_
@@ -170,6 +153,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let component_bytes =
         std::fs::read("../plugin-wasi/target/wasm32-wasi/release/plugin_wasi.wasm")
+            //std::fs::read("../plugin-wasi/target/wasm32-wasi/release/wasi_components_guest.wasm")
             .expect("component bytes");
 
     let component = Component::new(&store.engine(), &component_bytes).expect("create component");
@@ -190,17 +174,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
     MyWorld::add_to_linker(&mut linker, |state| state)?;
     let (my_world, _instance) = MyWorld::instantiate_async(&mut store, &component, &linker).await?;
 
-    println!(
-        "Point: {:?}",
-        my_world
-            .call_move_point(&mut store, Point { x: 50, y: 50 })
-            .await
-    );
-
     my_world.call_say_hello(&mut store).await?;
 
     println!(
-        "BYTES: {:?}",
+        "BYTES ss: {:?}",
         std::str::from_utf8(&*out_bytes.try_lock().unwrap())
     );
 

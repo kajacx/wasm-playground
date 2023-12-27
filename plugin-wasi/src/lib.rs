@@ -11,16 +11,7 @@ wit_bindgen::generate!({
 struct Plugin;
 
 impl Guest for Plugin {
-    fn move_point(mut point: Point) -> Point {
-        rand::thread_rng().gen::<u64>();
-        point = import_point(point);
-        point.x += 10;
-        point.y -= 20;
-        point
-    }
-
     fn say_hello() {
-        print("imported print fn");
         println!("Hello from updated (yet again) wasi plugin, will it print?");
 
         let time = std::time::SystemTime::now();
