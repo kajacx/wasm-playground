@@ -38,14 +38,4 @@ world my-world {
 
   export sqrt: func(num: float32) -> result<float32, string>
 
-  variant ab-variant {
-    b(s32),
-    a(tuple<s32, s32>),
-  }
-
-  import increment-bs-import: func(variants: list<ab-variant>) -> list<ab-variant>
-  export increment-ab-export: func(variants: list<ab-variant>) -> list<ab-variant>
-
-  import increment-deep-import: func(variants: list<list<ab-variant>>) -> list<list<ab-variant>>
-  export increment-deep-export: func(variants: list<list<ab-variant>>) -> list<list<ab-variant>>
 }

@@ -29,22 +29,6 @@ impl MyWorld for Guest {
             _ => Err("Negative".into()),
         }
     }
-
-    fn increment_ab_export(mut variants: Vec<AbVariant>) -> Vec<AbVariant> {
-        variants.iter_mut().for_each(|var| {
-            *var = if let AbVariant::A((a1, a2)) = var {
-                AbVariant::A((*a1 + 1, *a2 + 2))
-            } else {
-                *var
-            }
-        });
-        increment_bs_import(&variants)
-    }
-
-    fn increment_deep_export(variants: Vec<Vec<AbVariant>>) -> Vec<Vec<AbVariant>> {
-        let refs: Vec<_> = variants.iter().map(|x| x.as_slice()).collect();
-        increment_deep_import(&refs)
-    }
 }
 
 impl exports::example::protocol::guest_exports::GuestExports for Guest {
