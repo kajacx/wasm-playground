@@ -77,7 +77,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     println!("flags: {result:?}");
 
     let result = my_world.call_export_many_flags(&mut store)?;
-    println!("many flags: {result:?}");
+    println!(
+        "many flags: {result:?}, {:?}",
+        ManyFlags::F00 | ManyFlags::F01
+    );
 
     Ok(())
 }
