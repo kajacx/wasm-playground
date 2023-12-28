@@ -4,9 +4,8 @@ set -e
 # Run from the parten directory
 
 cd guest-rust
-cargo build --target=wasm32-unknown-unknown
+cargo component build --release --target=wasm32-unknown-unknown
 
-cd target/wasm32-unknown-unknown/debug/
-wasm-tools component new guest_rust.wasm -o component.wasm
-jco transpile component.wasm --instantiation -o out-dir
-jco transpile component.wasm -o no-instance
+cd target/wasm32-unknown-unknown/release/
+jco transpile guest_rust.wasm --instantiation -o out-dir
+jco transpile guest_rust.wasm -o no-instance

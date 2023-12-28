@@ -47,7 +47,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut store = Store::new(&engine, State::default());
 
     let component_bytes =
-        std::fs::read("../guest-rust/target/wasm32-unknown-unknown/debug/component.wasm")
+        std::fs::read("../guest-rust/target/wasm32-unknown-unknown/release/guest_rust.wasm")
             .expect("component bytes");
 
     let component = Component::new(&store.engine(), &component_bytes).expect("create component");
@@ -72,6 +72,12 @@ fn main() -> Result<(), Box<dyn Error>> {
     // cSpell::disable-next-line
     let result = my_world.singlewordexports().call_sub_three(&mut store, 5)?;
     println!("5 - 3 = {result}");
+
+    let result = my_world.call_export_flags(&mut store)?;
+    println!("flags: {result:?}");
+
+    let result = my_world.call_export_many_flags(&mut store)?;
+    println!("many flags: {result:?}");
 
     Ok(())
 }

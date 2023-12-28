@@ -3,13 +3,19 @@ use std::sync::Mutex;
 wit_bindgen::generate!({
     path: "../protocol.wit",
     world: "my-world",
+    exports: {
+        world: MyGuest,
+        "example:protocol/guest-exports": MyGuest,
+        "inline-exports": MyGuest,
+        "singlewordexports": MyGuest,
+    }
 });
 
-struct Guest;
+struct MyGuest;
 
 static GLOBAL_VALUE: Mutex<i32> = Mutex::new(0);
 
-impl MyWorld for Guest {
+impl Guest for MyGuest {
     fn move_point(mut point: Point) -> Point {
         point = import_point(point);
         point.x += 10;
@@ -29,16 +35,24 @@ impl MyWorld for Guest {
             _ => Err("Negative".into()),
         }
     }
+
+    fn export_flags() -> Permissions {
+        Permissions::READ.union(Permissions::WRITE)
+    }
+
+    fn export_many_flags() -> ManyFlags {
+        ManyFlags::F05.complement()
+    }
 }
 
-impl exports::example::protocol::guest_exports::GuestExports for Guest {
+impl exports::example::protocol::guest_exports::Guest for MyGuest {
     fn run() {
         example::protocol::host_imports::print_line("Hello, world!");
         example::protocol::host_imports::print_line("Hello, again!");
     }
 }
 
-impl exports::inline_exports::InlineExports for Guest {
+impl exports::inline_exports::Guest for MyGuest {
     fn add_three(num: i32) -> i32 {
         let num = inline_imports::add_one(num);
         let num = inline_imports::add_one(num);
@@ -48,7 +62,7 @@ impl exports::inline_exports::InlineExports for Guest {
 }
 
 // cSpell::disable
-impl exports::singlewordexports::Singlewordexports for Guest {
+impl exports::singlewordexports::Guest for MyGuest {
     fn sub_three(num: i32) -> i32 {
         let num = singlewordimports::sub_one(num);
         let num = singlewordimports::sub_one(num);
@@ -57,5 +71,3 @@ impl exports::singlewordexports::Singlewordexports for Guest {
     }
 }
 // cSpell::enable
-
-export_my_world!(Guest);

@@ -1,11 +1,11 @@
-package example:protocol
+package example:protocol;
 
 interface host-imports {
-  print-line: func(msg: string)
+  print-line: func(msg: string);
 }
 
 interface guest-exports {
-  run: func()
+  run: func();
 }
 
 world my-world {
@@ -14,28 +14,49 @@ world my-world {
     y: s32,
   }
 
-  import host-imports
-  export guest-exports
+  import host-imports;
+  export guest-exports;
 
   import inline-imports: interface {
-    add-one: func(num: s32) -> s32
+    add-one: func(num: s32) -> s32;
   }
   export inline-exports: interface {
-    add-three: func(num: s32) -> s32
+    add-three: func(num: s32) -> s32;
   }
 
   import singlewordimports: interface {
-    sub-one: func(num: s32) -> s32
+    sub-one: func(num: s32) -> s32;
   }
   export singlewordexports: interface {
-    sub-three: func(num: s32) -> s32
+    sub-three: func(num: s32) -> s32;
   }
 
-  import import-point: func(pnt: point) -> point
-  export move-point: func(pnt: point) -> point
+  import import-point: func(pnt: point) -> point;
+  export move-point: func(pnt: point) -> point;
 
-  export increment: func() -> s32
+  export increment: func() -> s32;
 
-  export sqrt: func(num: float32) -> result<float32, string>
+  export sqrt: func(num: float32) -> result<float32, string>;
 
+  flags permissions {
+    read,
+    write,
+    exec,
+  }
+
+  flags many-flags {
+    f00,
+    f01,
+    f02,
+    f03,
+    f04,
+    f05,
+    f06,
+    f07,
+    f08,
+    f09,
+  }
+
+  export export-flags: func() -> permissions;
+  export export-many-flags: func() -> many-flags;
 }
