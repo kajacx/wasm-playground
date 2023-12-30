@@ -43,6 +43,14 @@ impl Guest for MyGuest {
     fn export_many_flags() -> ManyFlags {
         ManyFlags::F05.complement()
     }
+
+    fn get_new_building(name: String) -> Building {
+        Building::new(&name)
+    }
+
+    fn get_buildings_name(b: &Building) -> String {
+        b.get_name()
+    }
 }
 
 impl exports::example::protocol::guest_exports::Guest for MyGuest {

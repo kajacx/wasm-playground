@@ -1,7 +1,7 @@
-use std::error::Error;
+use std::{collections::HashMap, error::Error};
 use wasmtime::{
-    component::{Component, Linker},
-    Config, Engine, Store,
+    component::{Component, Linker, Resource},
+    Config, Engine, Result, Store,
 };
 
 wasmtime::component::bindgen!({
@@ -10,7 +10,31 @@ wasmtime::component::bindgen!({
 });
 
 #[derive(Debug, Default, Clone)]
-struct State {}
+struct State {
+    buildings: HashMap<u32, String>,
+    next_id: u32,
+}
+
+impl HostBuilding for State {
+    fn new(&mut self, name: String) -> Result<Resource<Building>> {
+        let id = self.next_id;
+        self.buildings.insert(id, name);
+        self.next_id += 1;
+        Ok(Resource::new_own(id))
+    }
+
+    fn get_name(&mut self, building: Resource<Building>) -> Result<String> {
+        let building = self.buildings.get(&building.rep()).expect("get building");
+        Ok(building.clone())
+    }
+
+    fn drop(&mut self, building: Resource<Building>) -> Result<()> {
+        self.buildings
+            .remove(&building.rep())
+            .expect("remove building");
+        Ok(())
+    }
+}
 
 impl MyWorldImports for State {
     fn import_point(&mut self, mut point: Point) -> wasmtime::Result<Point> {
@@ -81,6 +105,12 @@ fn main() -> Result<(), Box<dyn Error>> {
         "many flags: {result:?}, {:?}",
         ManyFlags::F00 | ManyFlags::F01
     );
+
+    let result = my_world.call_get_new_building(&mut store, "building name")?;
+    println!("BUILDING: {result:?}");
+
+    let result = my_world.call_get_buildings_name(&mut store, result)?;
+    println!("BUILDING NAME: {result:?}");
 
     Ok(())
 }
