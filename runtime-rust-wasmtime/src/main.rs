@@ -112,5 +112,15 @@ fn main() -> Result<(), Box<dyn Error>> {
     let result = my_world.call_get_buildings_name(&mut store, result)?;
     println!("BUILDING NAME: {result:?}");
 
+    let result = my_world
+        .example_protocol_guest_exports()
+        .call_get_guest_resource(&mut store)?;
+    println!("GR: {result:?}");
+
+    let resource = my_world.example_protocol_guest_exports().guest_resource();
+
+    let result = resource.call_get_name(&mut store, result)?;
+    println!("GR name: {result:?}");
+
     Ok(())
 }

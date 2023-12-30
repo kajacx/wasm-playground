@@ -1,5 +1,8 @@
 use std::sync::Mutex;
 
+use exports::example::protocol::guest_exports::GuestGuestResource;
+use wit_bindgen::Resource;
+
 wit_bindgen::generate!({
     path: "../protocol.wit",
     world: "my-world",
@@ -8,8 +11,21 @@ wit_bindgen::generate!({
         "example:protocol/guest-exports": MyGuest,
         "inline-exports": MyGuest,
         "singlewordexports": MyGuest,
+        "example:protocol/guest-exports/guest-resource": MyGuestResource,
     }
 });
+
+pub struct MyGuestResource(String);
+
+impl GuestGuestResource for MyGuestResource {
+    fn new(name: wit_bindgen::rt::string::String) -> Self {
+        Self(name)
+    }
+
+    fn get_name(&self) -> wit_bindgen::rt::string::String {
+        self.0.clone()
+    }
+}
 
 struct MyGuest;
 
@@ -57,6 +73,10 @@ impl exports::example::protocol::guest_exports::Guest for MyGuest {
     fn run() {
         example::protocol::host_imports::print_line("Hello, world!");
         example::protocol::host_imports::print_line("Hello, again!");
+    }
+
+    fn get_guest_resource() -> exports::example::protocol::guest_exports::OwnGuestResource {
+        Resource::new(MyGuestResource("Hello resource".into()))
     }
 }
 

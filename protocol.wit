@@ -5,6 +5,13 @@ interface host-imports {
 }
 
 interface guest-exports {
+  resource guest-resource {
+    constructor(name: string);
+    get-name: func() -> string;
+  }
+
+  get-guest-resource: func() -> guest-resource;
+
   run: func();
 }
 
