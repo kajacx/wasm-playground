@@ -9,20 +9,16 @@ interface companies {
 }
 
 interface employees {
+  use companies.{company};
   resource employee {
     constructor(name: string, min-salary: u32);
     get-name: func() -> string;
     get-min-salary: func() -> u32;
   }
+  find-job: func(employee: borrow<employee>, companies: list<company>) -> option<company>;
 }
 
 world my-world {
-  use companies.{company};
-  use employees.{employee};
-
   import companies;
   export employees;
-
-  import can-employee-work-at: func(employee: borrow<employee>, company: borrow<company>) -> bool;
-  export find-job: func(employee: borrow<employee>, companies: list<company>) -> option<company>;
 }
