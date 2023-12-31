@@ -1,4 +1,5 @@
-use std::{collections::HashMap, error::Error};
+use example::protocol::{companies, employees};
+use std::{collections::HashMap, sync::Arc};
 use wasmtime::{
     component::{Component, Linker, Resource},
     Config, Engine, Result, Store,
@@ -9,65 +10,114 @@ wasmtime::component::bindgen!({
     world: "my-world"
 });
 
-#[derive(Debug, Default, Clone)]
-struct State {
-    buildings: HashMap<u32, String>,
+#[derive(Default, Clone)]
+struct MyCompany {
+    name: String,
+    max_salary: u32,
+}
+
+#[derive(Default, Clone)]
+struct MyEmployee {
+    name: String,
+    min_salary: u32,
+}
+
+#[derive(Default, Clone)]
+struct ResHolder<T> {
+    resources: HashMap<u32, T>,
     next_id: u32,
 }
 
-impl HostBuilding for State {
-    fn new(&mut self, name: String) -> Result<Resource<Building>> {
+impl<T> ResHolder<T> {
+    fn new(&mut self, item: T) -> u32 {
         let id = self.next_id;
-        self.buildings.insert(id, name);
+        self.resources.insert(id, item);
         self.next_id += 1;
-        Ok(Resource::new_own(id))
+        id
     }
 
-    fn get_name(&mut self, building: Resource<Building>) -> Result<String> {
-        let building = self.buildings.get(&building.rep()).expect("get building");
-        Ok(building.clone())
+    fn get(&self, id: u32) -> Option<&T> {
+        self.resources.get(&id)
     }
 
-    fn drop(&mut self, building: Resource<Building>) -> Result<()> {
-        self.buildings
-            .remove(&building.rep())
-            .expect("remove building");
-        Ok(())
+    fn drop(&mut self, id: u32) -> Result<(), ()> {
+        self.resources.remove(&id).map(|_| ()).ok_or(())
     }
+}
+
+#[derive(Default, Clone)]
+struct State {
+    companies: ResHolder<MyCompany>,
+    employees: ResHolder<MyEmployee>,
+    world: Option<Arc<MyWorld>>,
 }
 
 impl MyWorldImports for State {
-    fn import_point(&mut self, mut point: Point) -> wasmtime::Result<Point> {
-        point.x += 100;
-        Ok(point)
+    fn can_employee_work_at(
+        &mut self,
+        employee: Resource<Employee>,
+        company: Resource<Company>,
+    ) -> Result<bool> {
+        let company = self.companies.get(company.rep()).unwrap();
+        let employee = self.employees.get(employee.rep()).unwrap();
+        Ok(employee.min_salary <= company.max_salary)
     }
 }
 
-impl example::protocol::host_imports::Host for State {
-    fn print_line(&mut self, msg: String) -> wasmtime::Result<()> {
-        println!("Printing in host: {msg}");
+impl companies::HostCompany for State {
+    fn new(&mut self, name: String, max_salary: u32) -> Result<Resource<companies::Company>> {
+        Ok(Resource::new_own(
+            self.companies.new(MyCompany { name, max_salary }),
+        ))
+    }
+
+    fn get_name(&mut self, self_: Resource<companies::Company>) -> Result<String> {
+        Ok(self.companies.get(self_.rep()).unwrap().name.clone())
+    }
+
+    fn get_max_salary(&mut self, self_: Resource<companies::Company>) -> Result<u32> {
+        Ok(self.companies.get(self_.rep()).unwrap().max_salary)
+    }
+
+    fn drop(&mut self, rep: Resource<companies::Company>) -> Result<()> {
+        self.companies.drop(rep.rep()).unwrap();
         Ok(())
     }
 }
 
-impl inline_imports::Host for State {
-    fn add_one(&mut self, num: i32) -> wasmtime::Result<i32> {
-        Ok(num + 1)
+impl companies::Host for State {}
+
+impl employees::HostEmployee for State {
+    fn new(&mut self, name: String, min_salary: u32) -> Result<Resource<employees::Employee>> {
+        Ok(Resource::new_own(
+            self.employees.new(MyEmployee { name, min_salary }),
+        ))
+    }
+
+    fn get_name(&mut self, self_: Resource<employees::Employee>) -> Result<String> {
+        Ok(self.employees.get(self_.rep()).unwrap().name.clone())
+    }
+
+    fn get_min_salary(
+        &mut self,
+        self_: wasmtime::component::Resource<employees::Employee>,
+    ) -> Result<u32> {
+        Ok(self.employees.get(self_.rep()).unwrap().min_salary)
+    }
+
+    fn drop(&mut self, rep: wasmtime::component::Resource<employees::Employee>) -> Result<()> {
+        self.employees.drop(rep.rep()).unwrap();
+        Ok(())
     }
 }
 
-// cSpell::disable-next-line
-impl singlewordimports::Host for State {
-    fn sub_one(&mut self, num: i32) -> wasmtime::Result<i32> {
-        Ok(num - 1)
-    }
-}
+impl employees::Host for State {}
 
-fn main() -> Result<(), Box<dyn Error>> {
+fn main() {
     let mut config = Config::new();
     config.wasm_component_model(true);
 
-    let engine = Engine::new(&config)?;
+    let engine = Engine::new(&config).unwrap();
     let mut store = Store::new(&engine, State::default());
 
     let component_bytes =
@@ -78,49 +128,60 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut linker = Linker::new(store.engine());
 
-    MyWorld::add_to_linker(&mut linker, |state| state)?;
-    let (my_world, _instance) = MyWorld::instantiate(&mut store, &component, &linker)?;
+    MyWorld::add_to_linker(&mut linker, |state| state).unwrap();
+    let (my_world, _instance) = MyWorld::instantiate(&mut store, &component, &linker).unwrap();
+    let my_world = Arc::new(my_world);
+    store.data_mut().world = Some(my_world.clone());
 
-    my_world
-        .example_protocol_guest_exports()
-        .call_run(&mut store)?;
-
+    let employees = my_world.example_protocol_employees().employee();
+    let employee = employees
+        .call_constructor(&mut store, "Mike".into(), 50_000)
+        .unwrap();
+    println!("What can this be used for? {employee:?}");
     println!(
-        "Point: {:?}",
-        my_world.call_move_point(&mut store, Point { x: 50, y: 50 })
+        "Employee name: {}",
+        employees.call_get_name(&mut store, employee).unwrap()
     );
 
-    let result = my_world.inline_exports().call_add_three(&mut store, 5)?;
-    println!("5 + 3 = {result}");
+    let employee = Resource::new_own(store.data_mut().employees.new(MyEmployee {
+        name: "Mike".into(),
+        min_salary: 50_000,
+    }));
 
-    // cSpell::disable-next-line
-    let result = my_world.singlewordexports().call_sub_three(&mut store, 5)?;
-    println!("5 - 3 = {result}");
-
-    let result = my_world.call_export_flags(&mut store)?;
-    println!("flags: {result:?}");
-
-    let result = my_world.call_export_many_flags(&mut store)?;
-    println!(
-        "many flags: {result:?}, {:?}",
-        ManyFlags::F00 | ManyFlags::F01
-    );
-
-    let result = my_world.call_get_new_building(&mut store, "building name")?;
-    println!("BUILDING: {result:?}");
-
-    let result = my_world.call_get_buildings_name(&mut store, result)?;
-    println!("BUILDING NAME: {result:?}");
+    let company1 = Resource::new_own(store.data_mut().companies.new(MyCompany {
+        name: "Company1".into(),
+        max_salary: 30_000,
+    }));
 
     let result = my_world
-        .example_protocol_guest_exports()
-        .call_get_guest_resource(&mut store)?;
-    println!("GR: {result:?}");
+        .call_find_job(
+            &mut store,
+            Resource::new_borrow(employee.rep()),
+            &[company1],
+        )
+        .unwrap();
+    println!("Find first job: {result:?}");
 
-    let resource = my_world.example_protocol_guest_exports().guest_resource();
+    let company1 = Resource::new_own(store.data_mut().companies.new(MyCompany {
+        name: "Company1".into(),
+        max_salary: 30_000,
+    }));
+    let company2 = Resource::new_own(store.data_mut().companies.new(MyCompany {
+        name: "Company2".into(),
+        max_salary: 60_000,
+    }));
 
-    let result = resource.call_get_name(&mut store, result)?;
-    println!("GR name: {result:?}");
-
-    Ok(())
+    let result = my_world
+        .call_find_job(&mut store, employee, &[company1, company2])
+        .unwrap();
+    println!("Find second job: {result:?}");
+    println!(
+        "Second job name: {}",
+        store
+            .data()
+            .companies
+            .get(result.unwrap().rep())
+            .unwrap()
+            .name
+    );
 }

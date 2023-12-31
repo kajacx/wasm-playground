@@ -24,5 +24,5 @@ world my-world {
   export employees;
 
   import can-employee-work-at: func(employee: borrow<employee>, company: borrow<company>) -> bool;
-  export find-job: func(employee: borrow<employee>, companies: list<borrow<company>>) -> option<company>;
+  export find-job: func(employee: borrow<employee>, companies: list<company>) -> option<company>;
 }
