@@ -1,101 +1,28 @@
 package example:protocol;
 
-interface host-imports {
-  print-line: func(msg: string);
+interface companies {
+  resource company {
+    constructor(name: string, max-salary: u32);
+    get-name: func() -> string;
+    get-max-salary: func() -> u32;
+  }
 }
 
-interface guest-exports {
-  resource guest-resource {
-    constructor(name: string);
+interface employees {
+  resource employee {
+    constructor(name: string, min-salary: u32);
     get-name: func() -> string;
+    get-min-salary: func() -> u32;
   }
-
-  get-guest-resource: func() -> guest-resource;
-
-  run: func();
 }
 
 world my-world {
-  record point {
-    x: s32,
-    y: s32,
-  }
+  use companies.{company};
+  use employees.{employee};
 
-  import host-imports;
-  export guest-exports;
+  import companies;
+  export employees;
 
-  import inline-imports: interface {
-    add-one: func(num: s32) -> s32;
-  }
-  export inline-exports: interface {
-    add-three: func(num: s32) -> s32;
-  }
-
-  import singlewordimports: interface {
-    sub-one: func(num: s32) -> s32;
-  }
-  export singlewordexports: interface {
-    sub-three: func(num: s32) -> s32;
-  }
-
-  import import-point: func(pnt: point) -> point;
-  export move-point: func(pnt: point) -> point;
-
-  export increment: func() -> s32;
-
-  export sqrt: func(num: float32) -> result<float32, string>;
-
-  flags permissions {
-    read,
-    write,
-    exec,
-  }
-
-  flags many-flags {
-    f00,
-    f01,
-    f02,
-    f03,
-    f04,
-    f05,
-    f06,
-    f07,
-    f08,
-    f09,
-    f10,
-    f11,
-    f12,
-    f13,
-    f14,
-    f15,
-    f16,
-    f17,
-    f18,
-    f19,
-    f20,
-    f21,
-    f22,
-    f23,
-    f24,
-    f25,
-    f26,
-    f27,
-    f28,
-    f29,
-    f30,
-    f31,
-    f32,
-  }
-
-  export export-flags: func() -> permissions;
-  export export-many-flags: func() -> many-flags;
-
-  resource building {
-    constructor(name: string);
-    get-name: func() -> string;
-  }
-
-  export get-new-building: func(name: string) -> building;
-  export get-buildings-name: func(b: borrow<building>) -> string;
-
+  import can-employee-work-at: func(employee: borrow<employee>, company: borrow<company>) -> bool;
+  export find-job: func(employee: borrow<employee>, companies: list<borrow<company>>) -> option<company>;
 }
