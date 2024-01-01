@@ -1,50 +1,53 @@
 let _env;
-export function _setEnv (envObj) {
+export function _setEnv(envObj) {
   _env = Object.entries(envObj);
 }
 
 export const cliBaseEnvironment = {
-  getEnvironment () {
+  getEnvironment() {
     if (!_env) _env = [];
     return _env;
-  }
+  },
+  environment() {
+    return [];
+  },
 };
 
 class ComponentExit extends Error {
   constructor(code) {
-    super(`Component exited ${code === 0 ? 'successfully' : 'with error'}`);
+    super(`Component exited ${code === 0 ? "successfully" : "with error"}`);
     this.code = code;
   }
 }
 
 export const cliBaseExit = {
-  exit (status) {
-    throw new ComponentExit(status.tag === 'err' ? 1 : 0);
-  }
+  exit(status) {
+    throw new ComponentExit(status.tag === "err" ? 1 : 0);
+  },
 };
 
 export const cliBasePreopens = {
-  getDirectories () {
+  getDirectories() {
     return [];
-  }
-}
+  },
+};
 
 export const cliBaseStdin = {
-  getStdin () {
+  getStdin() {
     return 0;
-  }
+  },
 };
 
 export const cliBaseStdout = {
-  getStdout () {
+  getStdout() {
     return 1;
-  }
+  },
 };
 
 export const cliBaseStderr = {
-  getStderr () {
+  getStderr() {
     return 2;
-  }
+  },
 };
 
 export {
@@ -53,5 +56,5 @@ export {
   cliBasePreopens as preopens,
   cliBaseStdin as stdin,
   cliBaseStdout as stdout,
-  cliBaseStderr as stderr
-}
+  cliBaseStderr as stderr,
+};

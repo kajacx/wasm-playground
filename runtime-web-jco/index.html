@@ -7,60 +7,113 @@
   </head>
   <body>
     <script>
-      import("./out-dir/plugin_wasi.js").then(async ({ instantiate }) => {
-        let wasiImportsFiles = [
-          "cli-base",
-          "clocks",
-          "filesystem",
-          "http",
-          "io",
-          "logging",
-          "poll",
-          "random",
-          "sockets",
-        ];
-        let wasiImports = {};
-        for (let wasiImportFile of wasiImportsFiles) {
-          wasiImports[`@bytecodealliance/preview2-shim/${wasiImportFile}`] =
-            await import(`/src/browser/${wasiImportFile}.js`);
-        }
-        console.log("WASI IMPORTS:", wasiImports);
-
-        let instance = await instantiate(
-          (core, imports) => {
-            console.log("Compiling core ...", core, imports);
-            // let file = files.find((f) => f[0] === core)[1];
-            // console.log("Found file", file);
-            // return WebAssembly.compile(file);
-            return fetch(`/out-dir/${core}`)
-              .then((resp) => resp.arrayBuffer())
-              .then((buffer) => {
-                console.log("compile core buffer:", buffer);
-                return WebAssembly.compile(buffer);
-              });
-          },
-          {
-            "import-point": {
-              default(point) {
-                console.log("IN JCO INSTANTIATED IMPORTS", point);
-                point.x = point.x + 100;
-                return Promise.resolve(point);
+      let fake = 0;
+      // import("./out-dir/plugin_wasi.js").then(async ({ instantiate }) => {
+      import("./out-dir/wasi_components_guest.js").then(
+        async ({ instantiate }) => {
+          let wasiImportsFiles = [
+            "cli-base",
+            "clocks",
+            "filesystem",
+            "http",
+            "io",
+            "logging",
+            "poll",
+            "random",
+            "sockets",
+          ];
+          let wasiImports = {
+            "wasi:cli/environment": {
+              getEnvironment: () => [],
+            },
+            "wasi:cli/exit": {},
+            "wasi:cli/stderr": {
+              getStderr: () => 2,
+            },
+            "wasi:cli/stdout": {
+              getStdout: () => 1,
+            },
+            "wasi:cli/stdin": {
+              getStdin: () => 0,
+            },
+            "wasi:cli/terminal-stderr": {
+              getTerminalStderr: () => 2,
+            },
+            "wasi:cli/terminal-stdout": {
+              getTerminalStdout: () => 1,
+            },
+            "wasi:cli/terminal-stdin": {
+              getTerminalStdin: () => 0,
+            },
+            "wasi:clocks/monotonic-clock": {
+              now: (a, b, c) => {
+                //console.log("CALLING MONO NOW WITH:", a, b, c);
+                //return BigInt(performance.now() * 1000000);
+                console.log("HOW????", fake, performance.now());
+                fake = fake + 1000000;
+                return fake;
               },
             },
-            print: {
-              default(msg) {
-                console.log("IN JCO INSTANTIATED PRINT:", msg);
+            "wasi:clocks/wall-clock": {
+              now: (a, b, c) => {
+                console.log("CALLING WALL NOW WITH:", a, b, c);
+                let value = new Date() * 1;
+                return {
+                  seconds: value,
+                };
               },
             },
-            ...wasiImports,
+            "wasi:filesystem/preopens": {
+              getDirectories: () => [],
+            },
+            "wasi:filesystem/types": {},
+            "wasi:io/streams": {},
+          };
+          for (let wasiImportFile of wasiImportsFiles) {
+            wasiImports[`@bytecodealliance/preview2-shim/${wasiImportFile}`] =
+              await import(`/src/browser/${wasiImportFile}.js`);
           }
-        );
-        console.log("INSTANCE:", instance);
-        let { movePoint, sayHello } = instance;
+          console.log("WASI IMPORTS:", wasiImports);
 
-        sayHello();
-        console.log("MOVE POINT:", movePoint({ x: 50, y: 50 }));
-      });
+          let instance = await instantiate(
+            (core, imports) => {
+              console.log("Compiling core ...", core, imports);
+              // let file = files.find((f) => f[0] === core)[1];
+              // console.log("Found file", file);
+              // return WebAssembly.compile(file);
+              return fetch(`/out-dir/${core}`)
+                .then((resp) => resp.arrayBuffer())
+                .then((buffer) => {
+                  console.log("compile core buffer:", buffer);
+                  return WebAssembly.compile(buffer);
+                });
+            },
+            {
+              "import-point": {
+                default(point) {
+                  console.log("IN JCO INSTANTIATED IMPORTS", point);
+                  point.x = point.x + 100;
+                  return Promise.resolve(point);
+                },
+              },
+              print: {
+                default(msg) {
+                  console.log("IN JCO INSTANTIATED PRINT:", msg);
+                },
+              },
+              ...wasiImports,
+            }
+          );
+          console.log("INSTANCE:", instance);
+          // let { movePoint, sayHello } = instance;
+
+          // sayHello();
+          // console.log("MOVE POINT:", movePoint({ x: 50, y: 50 }));
+          let { nanosecondsBench, secondsSinceEpoch } = instance;
+          console.log("BENCH:", nanosecondsBench());
+          //console.log("SINCE EPOCH:", secondsSinceEpoch());
+        }
+      );
     </script>
   </body>
 </html>
