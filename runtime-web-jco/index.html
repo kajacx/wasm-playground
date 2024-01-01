@@ -8,6 +8,161 @@
   <body>
     <script>
       let fake = 0;
+      let id = 0;
+
+      const symbolDispose = Symbol.dispose || Symbol.for("dispose");
+
+      class InputStream {
+        /**
+         * @param {InputStreamHandler} handler
+         */
+        constructor(handler) {
+          if (!handler) console.trace("no handler");
+          this.id = ++id;
+          this.handler = handler;
+        }
+        read(len) {
+          if (this.handler.read) return this.handler.read(len);
+          return this.handler.blockingRead.call(this, len);
+        }
+        blockingRead(len) {
+          return this.handler.blockingRead.call(this, len);
+        }
+        skip(len) {
+          if (this.handler.skip) return this.handler.skip.call(this, len);
+          if (this.handler.read) {
+            const bytes = this.handler.read.call(this, len);
+            return BigInt(bytes.byteLength);
+          }
+          return this.blockingSkip.call(this, len);
+        }
+        blockingSkip(len) {
+          if (this.handler.blockingSkip)
+            return this.handler.blockingSkip.call(this, len);
+          const bytes = this.handler.blockingRead.call(this, len);
+          return BigInt(bytes.byteLength);
+        }
+        subscribe() {
+          console.log(`[streams] Subscribe to input stream ${this.id}`);
+        }
+        [symbolDispose]() {
+          if (this.handler.drop) this.handler.drop.call(this);
+        }
+      }
+
+      class OutputStream {
+        /**
+         * @param {OutputStreamHandler} handler
+         */
+        constructor(handler) {
+          if (!handler) console.trace("no handler");
+          this.id = ++id;
+          this.open = true;
+          this.handler = handler;
+        }
+        checkWrite(len) {
+          if (!this.open) return 0n;
+          if (this.handler.checkWrite)
+            return this.handler.checkWrite.call(this, len);
+          return 1_000_000n;
+        }
+        write(buf) {
+          this.handler.write.call(this, buf);
+        }
+        blockingWriteAndFlush(buf) {
+          /// Perform a write of up to 4096 bytes, and then flush the stream. Block
+          /// until all of these operations are complete, or an error occurs.
+          ///
+          /// This is a convenience wrapper around the use of `check-write`,
+          /// `subscribe`, `write`, and `flush`, and is implemented with the
+          /// following pseudo-code:
+          ///
+          /// ```text
+          /// let pollable = this.subscribe();
+          /// while !contents.is_empty() {
+          ///     // Wait for the stream to become writable
+          ///     poll-one(pollable);
+          ///     let Ok(n) = this.check-write(); // eliding error handling
+          ///     let len = min(n, contents.len());
+          ///     let (chunk, rest) = contents.split_at(len);
+          ///     this.write(chunk  );            // eliding error handling
+          ///     contents = rest;
+          /// }
+          /// this.flush();
+          /// // Wait for completion of `flush`
+          /// poll-one(pollable);
+          /// // Check for any errors that arose during `flush`
+          /// let _ = this.check-write();         // eliding error handling
+          /// ```
+          this.handler.write.call(this, buf);
+        }
+        flush() {
+          if (this.handler.flush) this.handler.flush.call(this);
+        }
+        blockingFlush() {
+          this.open = true;
+        }
+        writeZeroes(len) {
+          this.write.call(this, new Uint8Array(Number(len)));
+        }
+        blockingWriteZeroes(len) {
+          this.blockingWrite.call(this, new Uint8Array(Number(len)));
+        }
+        blockingWriteZeroesAndFlush(len) {
+          this.blockingWriteAndFlush.call(this, new Uint8Array(Number(len)));
+        }
+        splice(src, len) {
+          const spliceLen = Math.min(len, this.checkWrite.call(this));
+          const bytes = src.read(spliceLen);
+          this.write.call(this, bytes);
+          return bytes.byteLength;
+        }
+        blockingSplice(_src, _len) {
+          console.log(`[streams] Blocking splice ${this.id}`);
+        }
+        forward(_src) {
+          console.log(`[streams] Forward ${this.id}`);
+        }
+        subscribe() {
+          console.log(`[streams] Subscribe to output stream ${this.id}`);
+        }
+        [symbolDispose]() {}
+      }
+
+      const stdinStream = new InputStream({
+        blockingRead(_len) {
+          // TODO
+        },
+        subscribe() {
+          // TODO
+        },
+        [symbolDispose]() {
+          // TODO
+        },
+      });
+      let textDecoder = new TextDecoder();
+      const stdoutStream = new OutputStream({
+        write(contents) {
+          console.log(textDecoder.decode(contents));
+        },
+        blockingFlush() {},
+        [symbolDispose]() {},
+      });
+      const stderrStream = new OutputStream({
+        write(contents) {
+          console.error(textDecoder.decode(contents));
+        },
+        blockingFlush() {},
+        [symbolDispose]() {},
+      });
+
+      class TerminalInput {}
+      class TerminalOutput {}
+
+      const terminalStdoutInstance = new TerminalOutput();
+      const terminalStderrInstance = new TerminalOutput();
+      const terminalStdinInstance = new TerminalInput();
+
       // import("./out-dir/plugin_wasi.js").then(async ({ instantiate }) => {
       import("./out-dir/wasi_components_guest.js").then(
         async ({ instantiate }) => {
@@ -24,26 +179,48 @@
           ];
           let wasiImports = {
             "wasi:cli/environment": {
-              getEnvironment: () => [],
+              getEnvironment: () => {
+                console.log("GET ENV");
+                return [];
+              },
             },
             "wasi:cli/exit": {},
             "wasi:cli/stderr": {
-              getStderr: () => 2,
+              getStderr: () => {
+                console.log("GET STDERR");
+                // return 2;
+                return stderrStream;
+              },
             },
             "wasi:cli/stdout": {
-              getStdout: () => 1,
+              getStdout: () => {
+                console.log("GET STDOUT");
+                return stdoutStream;
+              },
             },
             "wasi:cli/stdin": {
-              getStdin: () => 0,
+              getStdin: () => {
+                console.log("GET STDIN");
+                return stdinStream;
+              },
             },
             "wasi:cli/terminal-stderr": {
-              getTerminalStderr: () => 2,
+              getTerminalStderr: () => {
+                console.log("GET TERMINAL STDERR");
+                return terminalStderrInstance;
+              },
             },
             "wasi:cli/terminal-stdout": {
-              getTerminalStdout: () => 1,
+              getTerminalStdout: () => {
+                console.log("GET TERMINAL STDOUT");
+                return terminalStdoutInstance;
+              },
             },
             "wasi:cli/terminal-stdin": {
-              getTerminalStdin: () => 0,
+              getTerminalStdin: () => {
+                console.log("GET TERMINAL STDIN");
+                return terminalStdinInstance;
+              },
             },
             "wasi:clocks/monotonic-clock": {
               now: (a, b, c) => {
@@ -57,17 +234,28 @@
             "wasi:clocks/wall-clock": {
               now: (a, b, c) => {
                 console.log("CALLING WALL NOW WITH:", a, b, c);
-                let value = new Date() * 1;
+                let seconds = new Date() / 1000;
+                let seconds_whole = Math.floor(seconds);
+                let seconds_sub = seconds % 1;
                 return {
-                  seconds: value,
+                  seconds: seconds_whole,
+                  nanoseconds: Math.floor(seconds_sub * 1000000000),
                 };
               },
             },
             "wasi:filesystem/preopens": {
-              getDirectories: () => [],
+              getDirectories: () => {
+                console.log("GET DIRECTORIES");
+                return [];
+              },
             },
             "wasi:filesystem/types": {},
-            "wasi:io/streams": {},
+            "wasi:io/streams": {
+              TerminalInput,
+              TerminalOutput,
+              InputStream,
+              OutputStream,
+            },
           };
           for (let wasiImportFile of wasiImportsFiles) {
             wasiImports[`@bytecodealliance/preview2-shim/${wasiImportFile}`] =
@@ -111,7 +299,7 @@
           // console.log("MOVE POINT:", movePoint({ x: 50, y: 50 }));
           let { nanosecondsBench, secondsSinceEpoch } = instance;
           console.log("BENCH:", nanosecondsBench());
-          //console.log("SINCE EPOCH:", secondsSinceEpoch());
+          console.log("SINCE EPOCH:", secondsSinceEpoch());
         }
       );
     </script>
