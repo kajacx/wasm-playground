@@ -5,7 +5,7 @@ use js_component_bindgen::*;
 
 //     let opts = TranspileOpts {
 //         name: "wit_components_guest".to_string(),
-//         instantiation: Some(InstantiationMode::Async), // TODO: check this
+//         instantiation: Some(InstantiationMode::Async),
 //         ..Default::default()
 //     };
 
@@ -23,7 +23,7 @@ fn main() {
 
     let opts = TranspileOpts {
         name: "wasi_components_guest".to_string(),
-        instantiation: Some(InstantiationMode::Async), // TODO: check this
+        instantiation: Some(InstantiationMode::Async),
         ..Default::default()
     };
 

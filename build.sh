@@ -1,4 +1,9 @@
-#/usr/bin/sh
+#!/usr/bin/sh
+set -e
+
+rm -rf wasi-dir/wasi_*
+rm -rf wasi-dir/interfaces/*
+
 cargo run
 
 cd wit-dir
