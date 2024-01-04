@@ -299,9 +299,28 @@
           // console.log("MOVE POINT:", movePoint({ x: 50, y: 50 }));
           let { nanosecondsBench, secondsSinceEpoch } = instance;
           console.log("BENCH:", nanosecondsBench());
-          console.log("SINCE EPOCH:", secondsSinceEpoch());
+          console.log("SINCE EPOCHh:", secondsSinceEpoch());
         }
       );
+
+      let module = WebAssembly.compileStreaming(
+        fetch("out-dir/no_bindgen_guest.wasm")
+      ).then((module) => {
+        WebAssembly.instantiate(module, {
+          imported_fns: {
+            // add_one_i32: (i) => Promise.resolve(i + 2),
+            add_one_i32: (i) => i,
+            add_one_i64: (i) => i + 1n,
+            add_one_f32: (i) => i + 1,
+            add_one_f64: (i) => i + 1,
+            add_i32_import: (a, b) => a + b,
+            increment: () => {},
+          },
+        }).then((instance) => {
+          let result = instance.exports.add_three_i32(5);
+          console.log("RESULT IS:", result);
+        });
+      });
     </script>
   </body>
 </html>
