@@ -7,7 +7,6 @@
   </head>
   <body>
     <script>
-      let fake = 0;
       let id = 0;
 
       const symbolDispose = Symbol.dispose || Symbol.for("dispose");
@@ -129,9 +128,20 @@
         [symbolDispose]() {}
       }
 
+      let haveRead = false;
       const stdinStream = new InputStream({
         blockingRead(_len) {
-          // TODO
+          if (haveRead) {
+            throw { tag: "closed" };
+          }
+          haveRead = true;
+          let text = new Uint8Array(5);
+          text[0] = "H".codePointAt(0);
+          text[1] = "e".codePointAt(0);
+          text[2] = "l".codePointAt(0);
+          text[3] = "l".codePointAt(0);
+          text[4] = "o".codePointAt(0);
+          return text;
         },
         subscribe() {
           // TODO
@@ -222,27 +232,6 @@
                 return terminalStdinInstance;
               },
             },
-            "wasi:clocks/monotonic-clock": {
-              now: (a, b, c) => {
-                //console.log("CALLING MONO NOW WITH:", a, b, c);
-                //return BigInt(performance.now() * 1000000);
-                console.log("HOW????", fake, performance.now());
-                fake = fake + 1000000;
-                return fake;
-              },
-            },
-            "wasi:clocks/wall-clock": {
-              now: (a, b, c) => {
-                console.log("CALLING WALL NOW WITH:", a, b, c);
-                let seconds = new Date() / 1000;
-                let seconds_whole = Math.floor(seconds);
-                let seconds_sub = seconds % 1;
-                return {
-                  seconds: seconds_whole,
-                  nanoseconds: Math.floor(seconds_sub * 1000000000),
-                };
-              },
-            },
             "wasi:filesystem/preopens": {
               getDirectories: () => {
                 console.log("GET DIRECTORIES");
@@ -257,10 +246,10 @@
               OutputStream,
             },
           };
-          for (let wasiImportFile of wasiImportsFiles) {
-            wasiImports[`@bytecodealliance/preview2-shim/${wasiImportFile}`] =
-              await import(`/src/browser/${wasiImportFile}.js`);
-          }
+          // for (let wasiImportFile of wasiImportsFiles) {
+          //   wasiImports[`@bytecodealliance/preview2-shim/${wasiImportFile}`] =
+          //     await import(`/src/browser/${wasiImportFile}.js`);
+          // }
           console.log("WASI IMPORTS:", wasiImports);
 
           let instance = await instantiate(
@@ -277,18 +266,6 @@
                 });
             },
             {
-              "import-point": {
-                default(point) {
-                  console.log("IN JCO INSTANTIATED IMPORTS", point);
-                  point.x = point.x + 100;
-                  return Promise.resolve(point);
-                },
-              },
-              print: {
-                default(msg) {
-                  console.log("IN JCO INSTANTIATED PRINT:", msg);
-                },
-              },
               ...wasiImports,
             }
           );
@@ -297,30 +274,34 @@
 
           // sayHello();
           // console.log("MOVE POINT:", movePoint({ x: 50, y: 50 }));
-          let { nanosecondsBench, secondsSinceEpoch } = instance;
-          console.log("BENCH:", nanosecondsBench());
-          console.log("SINCE EPOCHh:", secondsSinceEpoch());
+          let { readlnFromStdin, writelnToStderr, writelnToStdout } = instance;
+          writelnToStdout("=== WRITE TO STDOUt ===");
+          writelnToStdout("=== WRITE TO STDOUt AGAIN ===");
+          writelnToStderr("=== WRITE TO STDERR ===");
+          writelnToStderr("=== WRITE TO STDERR AGAIN ===");
+          console.log("Read STD IN:", readlnFromStdin());
+          console.log("Read STD IN:", readlnFromStdin());
         }
       );
 
-      let module = WebAssembly.compileStreaming(
-        fetch("out-dir/no_bindgen_guest.wasm")
-      ).then((module) => {
-        WebAssembly.instantiate(module, {
-          imported_fns: {
-            // add_one_i32: (i) => Promise.resolve(i + 2),
-            add_one_i32: (i) => i,
-            add_one_i64: (i) => i + 1n,
-            add_one_f32: (i) => i + 1,
-            add_one_f64: (i) => i + 1,
-            add_i32_import: (a, b) => a + b,
-            increment: () => {},
-          },
-        }).then((instance) => {
-          let result = instance.exports.add_three_i32(5);
-          console.log("RESULT IS:", result);
-        });
-      });
+      // WebAssembly.compileStreaming(fetch("out-dir/no_bindgen_guest.wasm")).then(
+      //   (module) => {
+      //     WebAssembly.instantiate(module, {
+      //       imported_fns: {
+      //         // add_one_i32: (i) => Promise.resolve(i + 2),
+      //         add_one_i32: (i) => i,
+      //         add_one_i64: (i) => i + 1n,
+      //         add_one_f32: (i) => i + 1,
+      //         add_one_f64: (i) => i + 1,
+      //         add_i32_import: (a, b) => a + b,
+      //         increment: () => {},
+      //       },
+      //     }).then((instance) => {
+      //       let result = instance.exports.add_three_i32(5);
+      //       console.log("RESULT IS:", result);
+      //     });
+      //   }
+      // );
     </script>
   </body>
 </html>

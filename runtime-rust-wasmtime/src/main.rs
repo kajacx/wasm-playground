@@ -64,7 +64,7 @@ impl HostOutputStream for OutStream {
 }
 
 impl StdoutStream for OutStream {
-    fn stream(&self) -> Box<(dyn wasmtime_wasi::preview2::HostOutputStream + 'static)> {
+    fn stream(&self) -> Box<(dyn wasmtime_wasi::preview2::HostOutputStream)> {
         Box::new(Self(self.0.clone()))
     }
 
@@ -96,7 +96,7 @@ impl HostInputStream for InStream {
 }
 
 impl StdinStream for InStream {
-    fn stream(&self) -> Box<(dyn wasmtime_wasi::preview2::HostInputStream + 'static)> {
+    fn stream(&self) -> Box<(dyn wasmtime_wasi::preview2::HostInputStream)> {
         Box::new((*self).clone())
     }
 
