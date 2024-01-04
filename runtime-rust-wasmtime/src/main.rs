@@ -1,5 +1,6 @@
 use bytes::Bytes;
 use std::{
+    cell::RefCell,
     error::Error,
     sync::{Arc, Mutex},
 };
@@ -64,7 +65,7 @@ impl HostOutputStream for OutStream {
 
 impl StdoutStream for OutStream {
     fn stream(&self) -> Box<(dyn wasmtime_wasi::preview2::HostOutputStream + 'static)> {
-        Box::new((*self).clone()) // TODO: this is probably wrong
+        Box::new(Self(self.0.clone()))
     }
 
     fn isatty(&self) -> bool {
@@ -96,7 +97,7 @@ impl HostInputStream for InStream {
 
 impl StdinStream for InStream {
     fn stream(&self) -> Box<(dyn wasmtime_wasi::preview2::HostInputStream + 'static)> {
-        Box::new((*self).clone()) // TODO: this is probably wrong
+        Box::new((*self).clone())
     }
 
     fn isatty(&self) -> bool {
@@ -138,8 +139,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let table = Table::new();
     let wasi = WasiCtxBuilder::new()
-        // .stdout(out)
-        // .stdin(in_)
+        .stdout(out)
+        .stdin(in_)
         // .wall_clock(FakeClock)
         // .secure_random(random)
         // .set_monotonic_clock(FakeClock)
