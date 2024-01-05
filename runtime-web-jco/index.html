@@ -16,18 +16,22 @@
          * @param {InputStreamHandler} handler
          */
         constructor(handler) {
+          console.log("*** InputStream::constructor ***");
           if (!handler) console.trace("no handler");
           this.id = ++id;
           this.handler = handler;
         }
         read(len) {
+          console.log("*** InputStream::read ***");
           if (this.handler.read) return this.handler.read(len);
           return this.handler.blockingRead.call(this, len);
         }
         blockingRead(len) {
+          console.log("*** InputStream::blockingRead ***");
           return this.handler.blockingRead.call(this, len);
         }
         skip(len) {
+          console.log("*** InputStream::skip ***");
           if (this.handler.skip) return this.handler.skip.call(this, len);
           if (this.handler.read) {
             const bytes = this.handler.read.call(this, len);
@@ -36,15 +40,18 @@
           return this.blockingSkip.call(this, len);
         }
         blockingSkip(len) {
+          console.log("*** InputStream::blockingSkip ***");
           if (this.handler.blockingSkip)
             return this.handler.blockingSkip.call(this, len);
           const bytes = this.handler.blockingRead.call(this, len);
           return BigInt(bytes.byteLength);
         }
         subscribe() {
+          console.log("*** InputStream::subscribe ***");
           console.log(`[streams] Subscribe to input stream ${this.id}`);
         }
         [symbolDispose]() {
+          console.log("*** InputStream::dispose ***");
           if (this.handler.drop) this.handler.drop.call(this);
         }
       }
@@ -54,21 +61,25 @@
          * @param {OutputStreamHandler} handler
          */
         constructor(handler) {
+          console.log("*** OutputStream::constructor ***");
           if (!handler) console.trace("no handler");
           this.id = ++id;
           this.open = true;
           this.handler = handler;
         }
         checkWrite(len) {
+          console.log("*** OutputStream::checkWrite ***");
           if (!this.open) return 0n;
           if (this.handler.checkWrite)
             return this.handler.checkWrite.call(this, len);
           return 1_000_000n;
         }
         write(buf) {
+          console.log("*** OutputStream::write ***");
           this.handler.write.call(this, buf);
         }
         blockingWriteAndFlush(buf) {
+          console.log("*** OutputStream::blockingWriteAndFlush ***");
           /// Perform a write of up to 4096 bytes, and then flush the stream. Block
           /// until all of these operations are complete, or an error occurs.
           ///
@@ -96,36 +107,47 @@
           this.handler.write.call(this, buf);
         }
         flush() {
+          console.log("*** OutputStream::flush ***");
           if (this.handler.flush) this.handler.flush.call(this);
         }
         blockingFlush() {
+          console.log("*** OutputStream::blockingFlush ***");
           this.open = true;
         }
         writeZeroes(len) {
+          console.log("*** OutputStream::writeZeroes ***");
           this.write.call(this, new Uint8Array(Number(len)));
         }
         blockingWriteZeroes(len) {
+          console.log("*** OutputStream::blockingWriteZeroes ***");
           this.blockingWrite.call(this, new Uint8Array(Number(len)));
         }
         blockingWriteZeroesAndFlush(len) {
+          console.log("*** OutputStream::blockingWriteZeroesAndFlush ***");
           this.blockingWriteAndFlush.call(this, new Uint8Array(Number(len)));
         }
         splice(src, len) {
+          console.log("*** OutputStream::splice ***");
           const spliceLen = Math.min(len, this.checkWrite.call(this));
           const bytes = src.read(spliceLen);
           this.write.call(this, bytes);
           return bytes.byteLength;
         }
         blockingSplice(_src, _len) {
+          console.log("*** OutputStream::blockingSplice ***");
           console.log(`[streams] Blocking splice ${this.id}`);
         }
         forward(_src) {
+          console.log("*** OutputStream::forward ***");
           console.log(`[streams] Forward ${this.id}`);
         }
         subscribe() {
+          console.log("*** OutputStream::subscribe ***");
           console.log(`[streams] Subscribe to output stream ${this.id}`);
         }
-        [symbolDispose]() {}
+        [symbolDispose]() {
+          console.log("*** OutputStream::dispose ***");
+        }
       }
 
       let haveRead = false;
@@ -190,51 +212,51 @@
           let wasiImports = {
             "wasi:cli/environment": {
               getEnvironment: () => {
-                console.log("GET ENV");
+                console.log("*** GET ENV ***");
                 return [];
               },
             },
             "wasi:cli/exit": {},
-            "wasi:cli/stderr": {
-              getStderr: () => {
-                console.log("GET STDERR");
-                // return 2;
-                return stderrStream;
+            "wasi:cli/stdin": {
+              getStdin: () => {
+                console.log("*** GET STDIN ***");
+                return stdinStream;
               },
             },
             "wasi:cli/stdout": {
               getStdout: () => {
-                console.log("GET STDOUT");
+                console.log("*** GET STDOUT ***");
                 return stdoutStream;
               },
             },
-            "wasi:cli/stdin": {
-              getStdin: () => {
-                console.log("GET STDIN");
-                return stdinStream;
-              },
-            },
-            "wasi:cli/terminal-stderr": {
-              getTerminalStderr: () => {
-                console.log("GET TERMINAL STDERR");
-                return terminalStderrInstance;
-              },
-            },
-            "wasi:cli/terminal-stdout": {
-              getTerminalStdout: () => {
-                console.log("GET TERMINAL STDOUT");
-                return terminalStdoutInstance;
+            "wasi:cli/stderr": {
+              getStderr: () => {
+                console.log("*** GET STDERR ***");
+                // return 2;
+                return stderrStream;
               },
             },
             "wasi:cli/terminal-stdin": {
               getTerminalStdin: () => {
-                console.log("GET TERMINAL STDIN");
+                console.log("*** GET TERMINAL STDIN ***");
                 return terminalStdinInstance;
+              },
+            },
+            "wasi:cli/terminal-stdout": {
+              getTerminalStdout: () => {
+                console.log("*** GET TERMINAL STDOUT ***");
+                return terminalStdoutInstance;
+              },
+            },
+            "wasi:cli/terminal-stderr": {
+              getTerminalStderr: () => {
+                console.log("*** GET TERMINAL STDERR ***");
+                return terminalStderrInstance;
               },
             },
             "wasi:filesystem/preopens": {
               getDirectories: () => {
-                console.log("GET DIRECTORIES");
+                console.log("*** GET DIRECTORIES ***");
                 return [];
               },
             },
@@ -275,7 +297,7 @@
           // sayHello();
           // console.log("MOVE POINT:", movePoint({ x: 50, y: 50 }));
           let { readlnFromStdin, writelnToStderr, writelnToStdout } = instance;
-          writelnToStdout("=== WRITE TO STDOUt ===");
+          writelnToStdout("=== WRITE TO STDOUT ===");
           writelnToStdout("=== WRITE TO STDOUt AGAIN ===");
           writelnToStderr("=== WRITE TO STDERR ===");
           writelnToStderr("=== WRITE TO STDERR AGAIN ===");

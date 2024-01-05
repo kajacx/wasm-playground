@@ -49,7 +49,6 @@ impl Subscribe for OutStream {
 
 impl HostOutputStream for OutStream {
     fn write(&mut self, buf: bytes::Bytes) -> StreamResult<()> {
-        let len = buf.len();
         self.0.try_lock().unwrap().extend(buf);
         StreamResult::Ok(())
     }
@@ -64,7 +63,7 @@ impl HostOutputStream for OutStream {
 }
 
 impl StdoutStream for OutStream {
-    fn stream(&self) -> Box<(dyn wasmtime_wasi::preview2::HostOutputStream)> {
+    fn stream(&self) -> Box<dyn HostOutputStream> {
         Box::new(Self(self.0.clone()))
     }
 
