@@ -1,6 +1,5 @@
 use bytes::Bytes;
 use std::{
-    cell::RefCell,
     error::Error,
     sync::{Arc, Mutex},
 };
@@ -140,6 +139,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let wasi = WasiCtxBuilder::new()
         .stdout(out)
         .stdin(in_)
+        .env("foo", "Foo")
+        .envs(&[("bar", "Bar"), ("buz", "Buz")])
         // .wall_clock(FakeClock)
         // .secure_random(random)
         // .set_monotonic_clock(FakeClock)
@@ -186,6 +187,23 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("LINE: {:?}", my_world.call_read_line(&mut store).await?);
 
     println!("5 + 3 = {:?}", my_world.call_add_three(&mut store, 5).await);
+
+    println!(
+        "ENV foo: {:?}",
+        my_world.call_get_env(&mut store, "foo").await?
+    );
+    println!(
+        "ENV bar: {:?}",
+        my_world.call_get_env(&mut store, "bar").await?
+    );
+    println!(
+        "ENV buz: {:?}",
+        my_world.call_get_env(&mut store, "buz").await?
+    );
+    println!(
+        "ENV other: {:?}",
+        my_world.call_get_env(&mut store, "other").await?
+    );
 
     Ok(())
 }

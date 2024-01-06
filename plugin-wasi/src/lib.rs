@@ -1,5 +1,3 @@
-use rand::Rng;
-
 wit_bindgen::generate!({
     path: "../protocol.wit",
     world: "my-world",
@@ -33,5 +31,9 @@ impl Guest for Plugin {
 
     fn add_three(num: u64) -> u64 {
         num + 3
+    }
+
+    fn get_env(name: String) -> Option<String> {
+        std::env::var(name).ok()
     }
 }
