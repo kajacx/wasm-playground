@@ -1,7 +1,7 @@
 use example::protocol::companies;
 use std::collections::HashMap;
 use wasmtime::{
-    component::{Component, Linker, Resource},
+    component::{Component, Linker, Resource, ResourceAny},
     Config, Engine, Result, Store,
 };
 
@@ -86,7 +86,7 @@ fn main() {
     let (my_world, _instance) = MyWorld::instantiate(&mut store, &component, &linker).unwrap();
 
     let employees = my_world.example_protocol_employees().employee();
-    let employee = employees
+    let employee: ResourceAny = employees
         .call_constructor(&mut store, "Mike".into(), 50_000)
         .unwrap();
     println!(
