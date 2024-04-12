@@ -6,5 +6,5 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-wasmtime = { version = "15.0.0", features = ["component-model"] }
+wasmtime = { version = "19.0.2", default-features = false, features = ["cranelift", "runtime", "component-model"] }
 

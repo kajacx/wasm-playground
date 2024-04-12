@@ -7,7 +7,7 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-wit-bindgen = { version = "0.15.0" }
+wit-bindgen = { version = "0.24.0" }
 
 [package.metadata.component]
 package = "component:guest-rust"
