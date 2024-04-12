@@ -47,6 +47,22 @@ fn run_wasm() -> Result<(), Box<dyn Error>> {
 
     let instance = linker.instantiate(&mut store, &module)?;
 
+    // instance.exports(&mut store).
+    let memory = instance.get_memory(&mut store, "memory").unwrap();
+    memory.write(&mut store, 50, &[8, 9]);
+    memory.read(&mut store, 90, &mut [8]);
+
+    let bytes = vec![0u8; 3];
+    let bytes = bytes.into_boxed_slice();
+    let addr = Box::leak(bytes);
+    let add = addr as *mut [u8] as *mut u8;
+
+    unsafe {
+        std::ptr::read(add);
+        // std::ptr::write(dst, src)
+    }
+
+    // instance.get
     // Call imported fn
     // let add_three_i32 = instance.get_typed_func::<i32, i32>(&mut store, "add_three_i32")?;
 
