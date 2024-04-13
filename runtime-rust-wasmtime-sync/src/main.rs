@@ -8,7 +8,7 @@ use wasmtime::{
     Config, Engine, Result, Store,
 };
 
-use wasmtime_wasi::preview2::*;
+use wasmtime_wasi::*;
 
 wasmtime::component::bindgen!({
     path: "../protocol.wit",
@@ -35,10 +35,9 @@ impl example::protocol::types::Host for State {}
 #[derive(Debug, Clone)]
 struct OutStream(Arc<Mutex<Vec<u8>>>);
 
-// #[async_trait::async_trait]
+#[async_trait::async_trait]
 impl Subscribe for OutStream {
-    // async fn ready(&mut self) {}
-    fn ready(&mut self) {}
+    async fn ready(&mut self) {}
 }
 
 impl HostOutputStream for OutStream {
@@ -89,7 +88,7 @@ impl HostInputStream for InStream {
 }
 
 impl StdinStream for InStream {
-    fn stream(&self) -> Box<(dyn wasmtime_wasi::preview2::HostInputStream)> {
+    fn stream(&self) -> Box<(dyn HostInputStream)> {
         Box::new((*self).clone())
     }
 
@@ -122,17 +121,18 @@ impl HostMonotonicClock for FakeClock {
 fn main() -> Result<(), Box<dyn Error>> {
     let mut config = Config::new();
     config.wasm_component_model(true);
-    config.async_support(true);
+    // config.async_support(true);
 
     let out_bytes = Arc::new(Mutex::new(Vec::<u8>::new()));
     let out = OutStream(out_bytes.clone());
 
     let in_ = InStream("Hello world!\n".to_string().into_bytes(), 0);
 
-    let table = Table::new();
+    let table = ResourceTable::new();
     let wasi = WasiCtxBuilder::new()
         .stdout(out)
         .stdin(in_)
+        // .inherit_stdio()
         .env("foo", "Foo")
         .envs(&[("bar", "Bar"), ("buz", "Buz")])
         // .wall_clock(FakeClock)
@@ -164,7 +164,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Use this instead
     // command::add_to_linker(&mut linker)?;
-    command::add_to_linker(&mut linker)?;
+    command::sync::add_to_linker(&mut linker)?;
 
     MyWorld::add_to_linker(&mut linker, |state| state)?;
     let (my_world, _instance) = MyWorld::instantiate(&mut store, &component, &linker)?;

@@ -1,3 +1,4 @@
 /Cargo.lock
 /Cargo-component.lock
 /target/
+/src/bindings.rs
