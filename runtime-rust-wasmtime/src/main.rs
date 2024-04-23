@@ -8,7 +8,7 @@ use wasmtime::{
     Config, Engine, Result, Store,
 };
 
-use wasmtime_wasi::preview2::*;
+use wasmtime_wasi::*;
 
 wasmtime::component::bindgen!({
     path: "../protocol.wit",
@@ -17,21 +17,16 @@ wasmtime::component::bindgen!({
 });
 
 struct State {
-    table: Table,
+    table: ResourceTable,
     wasi: WasiCtx,
 }
 
 impl WasiView for State {
-    fn table(&self) -> &Table {
-        &self.table
-    }
-    fn table_mut(&mut self) -> &mut Table {
+    fn table(&mut self) -> &mut ResourceTable {
         &mut self.table
     }
-    fn ctx(&self) -> &WasiCtx {
-        &self.wasi
-    }
-    fn ctx_mut(&mut self) -> &mut WasiCtx {
+
+    fn ctx(&mut self) -> &mut WasiCtx {
         &mut self.wasi
     }
 }
@@ -94,7 +89,7 @@ impl HostInputStream for InStream {
 }
 
 impl StdinStream for InStream {
-    fn stream(&self) -> Box<(dyn wasmtime_wasi::preview2::HostInputStream)> {
+    fn stream(&self) -> Box<(dyn HostInputStream)> {
         Box::new((*self).clone())
     }
 
@@ -135,7 +130,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let in_ = InStream("Hello world!\n".to_string().into_bytes(), 0);
 
-    let table = Table::new();
+    let table = ResourceTable::new();
     let wasi = WasiCtxBuilder::new()
         .stdout(out)
         .stdin(in_)
@@ -170,7 +165,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // Use this instead
     // command::add_to_linker(&mut linker)?;
-    command::add_to_linker(&mut linker)?;
+    add_to_linker_async(&mut linker)?;
 
     MyWorld::add_to_linker(&mut linker, |state| state)?;
     let (my_world, _instance) = MyWorld::instantiate_async(&mut store, &component, &linker).await?;
