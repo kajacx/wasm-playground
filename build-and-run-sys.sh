@@ -1,6 +1,7 @@
 #!/usr/bin/sh
 set -e
 
+echo BUILDING GUEST
 guest-rust/build-guest.sh
 
 echo GUEST BUILT, RUNNING HOST

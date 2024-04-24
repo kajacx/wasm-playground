@@ -36,3 +36,5 @@ impl exports::example::protocol::employees::GuestEmployee for MyEmployee {
         self.min_salary
     }
 }
+
+export!(MyEmployees);

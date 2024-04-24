@@ -68,6 +68,8 @@ impl companies::HostCompany for State {
 impl companies::Host for State {}
 
 fn main() {
+    println!("Starting...");
+
     let mut config = Config::new();
     config.wasm_component_model(true);
 
