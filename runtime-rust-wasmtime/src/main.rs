@@ -82,7 +82,7 @@ impl HostEmployee for State {
         &mut self,
         self_: wasmtime::component::Resource<employees::Employee>,
     ) -> wasmtime::Result<u32> {
-        Ok(15_000)
+        Ok(50_000)
     }
 
     fn get_name(

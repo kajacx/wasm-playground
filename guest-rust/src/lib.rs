@@ -42,10 +42,12 @@ impl Guest for MyEmployees {
     }
 
     fn company_roundtrip_export(company: Company) -> Company {
+        let _name = company.get_name();
         company_roundtrip_import(company)
     }
 
     fn employee_roundtrip_export(employee: Employee) -> Employee {
+        let _name = employee.get_name();
         employee_roundtrip_import(employee)
     }
 }
