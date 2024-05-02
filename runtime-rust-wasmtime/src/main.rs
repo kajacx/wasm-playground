@@ -70,9 +70,57 @@ impl companies::HostCompany for State {
 
 impl companies::Host for State {}
 
-impl HostEmployee for State {}
+impl HostEmployee for State {
+    fn drop(
+        &mut self,
+        rep: wasmtime::component::Resource<employees::Employee>,
+    ) -> wasmtime::Result<()> {
+        Ok(())
+    }
+
+    fn get_min_salary(
+        &mut self,
+        self_: wasmtime::component::Resource<employees::Employee>,
+    ) -> wasmtime::Result<u32> {
+        Ok(15_000)
+    }
+
+    fn get_name(
+        &mut self,
+        self_: wasmtime::component::Resource<employees::Employee>,
+    ) -> wasmtime::Result<String> {
+        Ok("Anon".into())
+    }
+
+    fn new(
+        &mut self,
+        name: String,
+        min_salary: u32,
+    ) -> wasmtime::Result<wasmtime::component::Resource<employees::Employee>> {
+        Ok(Resource::new_own(0))
+    }
+}
 
 impl employees::Host for State {}
+
+impl MyWorldImports for State {
+    fn company_roundtrip_import(
+        &mut self,
+        company: wasmtime::component::Resource<Company>,
+    ) -> wasmtime::Result<wasmtime::component::Resource<Company>> {
+        let name = &self.companies.get(company.rep()).unwrap().name;
+        println!("Company roundtrip: {name}");
+        Ok(company)
+    }
+
+    fn employee_roundtrip_import(
+        &mut self,
+        employee: wasmtime::component::Resource<Employee>,
+    ) -> wasmtime::Result<wasmtime::component::Resource<Employee>> {
+        println!("Employee name: ???");
+        Ok(employee)
+    }
+}
 
 fn main() {
     println!("Starting...");
@@ -108,8 +156,10 @@ fn main() {
         max_salary: 30_000,
     }));
 
+    let employee = Resource::new_own(0);
+
     let result = my_world
-        .example_protocol_employees()
+        // .example_protocol_employees()
         .call_find_job(&mut store, employee, &[company1])
         .unwrap();
     println!("Find first job: {result:?}");
@@ -123,8 +173,10 @@ fn main() {
         max_salary: 60_000,
     }));
 
+    let employee = Resource::new_own(0);
+
     let result = my_world
-        .example_protocol_employees()
+        // .example_protocol_employees()
         .call_find_job(&mut store, employee, &[company1, company2])
         .unwrap();
     println!("Find second job: {result:?}");
