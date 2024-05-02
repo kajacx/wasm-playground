@@ -9,16 +9,26 @@ interface companies {
 }
 
 interface employees {
-  use companies.{company};
   resource employee {
     constructor(name: string, min-salary: u32);
     get-name: func() -> string;
     get-min-salary: func() -> u32;
   }
-  find-job: func(employee: borrow<employee>, companies: list<company>) -> option<company>;
 }
 
 world my-world {
   import companies;
+  use companies.{company};
+
   export employees;
+  use employees.{employee};
+
+  export find-job: func(employee: employee, companies: list<company>) -> option<company>;
+  export find-employee: func(company: company, employees: list<employee>) -> option<employee>;
+
+  export company-roundtrip-export: func(company: company) -> company;
+  import company-roundtrip-import: func(company: company) -> company;
+
+  export employee-roundtrip-export: func(employee: employee) -> employee;
+  import employee-roundtrip-import: func(employee: employee) -> employee;
 }

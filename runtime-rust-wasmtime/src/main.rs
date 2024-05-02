@@ -1,4 +1,7 @@
-use example::protocol::companies;
+use example::protocol::{
+    companies,
+    employees::{self, HostEmployee},
+};
 use std::collections::HashMap;
 use wasmtime::{
     component::{Component, Linker, Resource, ResourceAny},
@@ -66,6 +69,10 @@ impl companies::HostCompany for State {
 }
 
 impl companies::Host for State {}
+
+impl HostEmployee for State {}
+
+impl employees::Host for State {}
 
 fn main() {
     println!("Starting...");
