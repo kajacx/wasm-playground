@@ -17,6 +17,10 @@
           return this.name;
         }
 
+        setName(name) {
+          this.name = name;
+        }
+
         getMaxSalary() {
           return this.maxSalary;
         }
@@ -34,20 +38,26 @@
                 Company: MyCompany,
               },
               ["component-test:wit-protocol/host-fns"]: {
-                companyRoundtrip: (company) => company,
+                companyRoundtrip: (company) => {
+                  company.name = `${company.name} trip`;
+                  return company;
+                },
               },
             }
           );
 
         let instance1 = await instantiate();
-        console.log(instance1);
-        console.log(instance1.employees);
-        console.log(instance1.employees.companyRoundtrip);
-        // let a = instance1.employees.companyRoundtrip;
-        // console.log(a(new MyCompany()));
         console.log(
-          instance1.guestFns.companyRoundtrip(new MyCompany("Company", 10000))
+          instance1.guestFns.companyRoundtrip(
+            new MyCompany("CompanyName", 10000)
+          )
         );
+
+        let employee = new instance1.employees.Employee("EmployeeName", 8000);
+        console.log(employee, employee.getName());
+
+        let returned = instance1.guestFns.employeeRoundtrip(employee);
+        console.log(returned, returned.getName());
       });
     </script>
   </body>

@@ -98,7 +98,7 @@ export async function instantiate(
   let captureCnt0 = 0;
   handleTables[0] = handleTable0;
 
-  function trampoline2(arg0) {
+  function trampoline3(arg0) {
     var handle1 = arg0;
     var rep2 = handleTable0[(handle1 << 1) + 1] & ~T_FLAG;
     var rsc0 = captureTable0.get(rep2);
@@ -153,14 +153,69 @@ export async function instantiate(
     return toUint32(ret);
   }
   let exports1;
-  let exports2;
   let memory0;
   let realloc0;
+
+  function trampoline6(arg0, arg1) {
+    var handle1 = arg0;
+    var rep2 = handleTable0[(handle1 << 1) + 1] & ~T_FLAG;
+    var rsc0 = captureTable0.get(rep2);
+    if (!rsc0) {
+      rsc0 = Object.create(Company.prototype);
+      Object.defineProperty(rsc0, symbolRscHandle, {
+        writable: true,
+        value: handle1,
+      });
+      Object.defineProperty(rsc0, symbolRscRep, {
+        writable: true,
+        value: rep2,
+      });
+    }
+    curResourceBorrows.push(rsc0);
+    const ret = rsc0.getName();
+    for (const rsc of curResourceBorrows) {
+      rsc[symbolRscHandle] = null;
+    }
+    curResourceBorrows = [];
+    var ptr3 = utf8Encode(ret, realloc0, memory0);
+    var len3 = utf8EncodedLen;
+    dataView(memory0).setInt32(arg1 + 4, len3, true);
+    dataView(memory0).setInt32(arg1 + 0, ptr3, true);
+  }
+
+  function trampoline7(arg0, arg1, arg2) {
+    var handle1 = arg0;
+    var rep2 = handleTable0[(handle1 << 1) + 1] & ~T_FLAG;
+    var rsc0 = captureTable0.get(rep2);
+    if (!rsc0) {
+      rsc0 = Object.create(Company.prototype);
+      Object.defineProperty(rsc0, symbolRscHandle, {
+        writable: true,
+        value: handle1,
+      });
+      Object.defineProperty(rsc0, symbolRscRep, {
+        writable: true,
+        value: rep2,
+      });
+    }
+    curResourceBorrows.push(rsc0);
+    var ptr3 = arg1;
+    var len3 = arg2;
+    var result3 = utf8Decoder.decode(
+      new Uint8Array(memory0.buffer, ptr3, len3)
+    );
+    rsc0.setName(result3);
+    for (const rsc of curResourceBorrows) {
+      rsc[symbolRscHandle] = null;
+    }
+    curResourceBorrows = [];
+  }
+  let exports2;
   let postReturn0;
   const handleTable1 = [T_FLAG, 0];
   const finalizationRegistry1 = finalizationRegistryCreate((handle) => {
     const { rep } = rscTableRemove(handleTable1, handle);
-    exports0["0"](rep);
+    exports0["2"](rep);
   });
 
   handleTables[1] = handleTable1;
@@ -168,10 +223,13 @@ export async function instantiate(
   function trampoline1(handle) {
     const handleEntry = rscTableRemove(handleTable1, handle);
     if (handleEntry.own) {
-      exports0["0"](handleEntry.rep);
+      exports0["2"](handleEntry.rep);
     }
   }
-  function trampoline3(handle) {
+  function trampoline2(handle) {
+    return handleTable1[(handle << 1) + 1] & ~T_FLAG;
+  }
+  function trampoline4(handle) {
     const handleEntry = rscTableRemove(handleTable0, handle);
     if (handleEntry.own) {
       const rsc = captureTable0.get(handleEntry.rep);
@@ -183,10 +241,6 @@ export async function instantiate(
       }
     }
   }
-  function trampoline4(handle) {
-    return handleTable1[(handle << 1) + 1] & ~T_FLAG;
-  }
-
   const withLogging =
     (callback, name) =>
     (...args) => {
@@ -199,31 +253,34 @@ export async function instantiate(
       );
       return result;
     };
-
   Promise.all([module0, module1, module2]).catch(() => {});
   ({ exports: exports0 } = await instantiateCore(await module1));
   ({ exports: exports1 } = await instantiateCore(await module0, {
     "[export]component-test:wit-protocol/employees": {
-      "[resource-drop]employee": withLogging(trampoline1),
-      "[resource-new]employee": withLogging(trampoline0),
-      "[resource-rep]employee": withLogging(trampoline2),
+      "[resource-drop]employee": withLogging(trampoline1, "drop"),
+      "[resource-new]employee": withLogging(trampoline0, "new"),
+      "[resource-rep]employee": withLogging(trampoline2, "rep"),
     },
     "component-test:wit-protocol/companies": {
       "[method]company.get-max-salary": trampoline5,
-      "[resource-drop]company": trampoline3,
+      "[method]company.get-name": exports0["0"],
+      "[method]company.set-name": exports0["1"],
+      "[resource-drop]company": trampoline4,
     },
     "component-test:wit-protocol/host-fns": {
-      "company-roundtrip": trampoline2,
-    },
-  }));
-  ({ exports: exports2 } = await instantiateCore(await module2, {
-    "": {
-      $imports: exports0.$imports,
-      0: exports1["component-test:wit-protocol/employees#[dtor]employee"],
+      "company-roundtrip": trampoline3,
     },
   }));
   memory0 = exports1.memory;
   realloc0 = exports1.cabi_realloc;
+  ({ exports: exports2 } = await instantiateCore(await module2, {
+    "": {
+      $imports: exports0.$imports,
+      0: trampoline6,
+      1: trampoline7,
+      2: exports1["component-test:wit-protocol/employees#[dtor]employee"],
+    },
+  }));
   postReturn0 =
     exports1[
       "cabi_post_component-test:wit-protocol/employees#[method]employee.get-name"
@@ -251,7 +308,7 @@ export async function instantiate(
           rscTableRemove(handleTable1, handle2);
           rsc1[symbolDispose] = emptyFunc;
           rsc1[symbolRscHandle] = null;
-          exports0["0"](handleTable1[(handle2 << 1) + 1] & ~T_FLAG);
+          exports0["2"](handleTable1[(handle2 << 1) + 1] & ~T_FLAG);
         },
       });
       return rsc1;
@@ -275,6 +332,21 @@ export async function instantiate(
     );
     postReturn0(ret);
     return result2;
+  };
+
+  Employee.prototype.setName = function setName(arg1) {
+    var handle1 = this[symbolRscHandle];
+    if (!handle1 || (handleTable1[(handle1 << 1) + 1] & T_FLAG) === 0) {
+      throw new TypeError('Resource error: Not a valid "Employee" resource.');
+    }
+    var handle0 = handleTable1[(handle1 << 1) + 1] & ~T_FLAG;
+    var ptr2 = utf8Encode(arg1, realloc0, memory0);
+    var len2 = utf8EncodedLen;
+    exports1["component-test:wit-protocol/employees#[method]employee.set-name"](
+      handle0,
+      ptr2,
+      len2
+    );
   };
 
   Employee.prototype.getMinSalary = function getMinSalary() {
@@ -317,7 +389,7 @@ export async function instantiate(
         rscTableRemove(handleTable1, handle2);
         rsc1[symbolDispose] = emptyFunc;
         rsc1[symbolRscHandle] = null;
-        exports0["0"](handleTable1[(handle2 << 1) + 1] & ~T_FLAG);
+        exports0["2"](handleTable1[(handle2 << 1) + 1] & ~T_FLAG);
       },
     });
     return rsc1;
