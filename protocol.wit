@@ -1,0 +1,41 @@
+package example:protocol;
+
+interface companies {
+  resource company {
+    constructor(name: string, max-salary: u32);
+    get-name: func() -> string;
+    get-max-salary: func() -> u32;
+  }
+}
+
+interface host-fns {
+  use employees.{employee};
+  use companies.{company};
+
+  employee-roundtrip: func(employee: employee) -> employee;
+  company-roundtrip: func(company: company) -> company;
+}
+
+interface employees {
+  resource employee {
+    constructor(name: string, min-salary: u32);
+    get-name: func() -> string;
+    get-min-salary: func() -> u32;
+  }
+}
+
+interface guest-fns {
+  use employees.{employee};
+  use companies.{company};
+
+  employee-roundtrip: func(employee: employee) -> employee;
+  company-roundtrip: func(company: company) -> company;
+}
+
+world resources {
+  import companies;
+  import host-fns;
+  
+  export employees;
+  export guest-fns;
+}
