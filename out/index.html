@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <title>Component js JCO</title>
+    <base href="." />
+  </head>
+  <body>
+    <script type="module">
+      class MyCompany {
+        constructor(name, maxSalary) {
+          this.name = name;
+          this.maxSalary = maxSalary;
+        }
+
+        getName() {
+          return this.name;
+        }
+
+        getMaxSalary() {
+          return this.maxSalary;
+        }
+      }
+
+      import("./component.js").then(async (module) => {
+        let instantiate = () =>
+          module.instantiate(
+            async (url, imports) => {
+              let data = await fetch("./" + url);
+              return WebAssembly.compile(await data.arrayBuffer(), imports);
+            },
+            {
+              ["component-test:wit-protocol/companies"]: {
+                Company: MyCompany,
+              },
+              ["component-test:wit-protocol/host-fns"]: {
+                companyRoundtrip: (company) => company,
+              },
+            }
+          );
+
+        let instance1 = await instantiate();
+        console.log(instance1);
+        console.log(instance1.employees);
+        console.log(instance1.employees.companyRoundtrip);
+        // let a = instance1.employees.companyRoundtrip;
+        // console.log(a(new MyCompany()));
+        console.log(
+          instance1.guestFns.companyRoundtrip(new MyCompany("Company", 10000))
+        );
+      });
+    </script>
+  </body>
+</html>

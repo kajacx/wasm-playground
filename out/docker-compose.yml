@@ -1,0 +1,14 @@
+version: "3.7"
+
+services:
+  component-js-jco:
+    image: nginx:latest
+    container_name: component-js-jco
+    ports:
+      - "8095:80"
+    volumes:
+      - .:/usr/share/nginx/html
+    networks: []
+    restart: unless-stopped
+
+networks: {}

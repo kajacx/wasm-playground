@@ -1,0 +1,5 @@
+*
+!/.gitignore
+!/component.js
+!/docker-compose.yml
+!/index.html
