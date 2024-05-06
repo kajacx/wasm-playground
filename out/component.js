@@ -92,13 +92,14 @@ export async function instantiate(
 
   const { Company } = imports["component-test:wit-protocol/companies"];
   const { companyRoundtrip } = imports["component-test:wit-protocol/host-fns"];
+  const log = imports.log.default;
   let exports0;
   const handleTable0 = [T_FLAG, 0];
   const captureTable0 = new Map();
   let captureCnt0 = 0;
   handleTables[0] = handleTable0;
 
-  function trampoline3(arg0) {
+  function trampoline0(arg0) {
     var handle1 = arg0;
     var rep2 = handleTable0[(handle1 << 1) + 1] & ~T_FLAG;
     var rsc0 = captureTable0.get(rep2);
@@ -129,7 +130,7 @@ export async function instantiate(
     return handle3;
   }
 
-  function trampoline5(arg0) {
+  function trampoline3(arg0) {
     var handle1 = arg0;
     var rep2 = handleTable0[(handle1 << 1) + 1] & ~T_FLAG;
     var rsc0 = captureTable0.get(rep2);
@@ -157,6 +158,15 @@ export async function instantiate(
   let realloc0;
 
   function trampoline6(arg0, arg1) {
+    var ptr0 = arg0;
+    var len0 = arg1;
+    var result0 = utf8Decoder.decode(
+      new Uint8Array(memory0.buffer, ptr0, len0)
+    );
+    log(result0);
+  }
+
+  function trampoline7(arg0, arg1) {
     var handle1 = arg0;
     var rep2 = handleTable0[(handle1 << 1) + 1] & ~T_FLAG;
     var rsc0 = captureTable0.get(rep2);
@@ -183,7 +193,7 @@ export async function instantiate(
     dataView(memory0).setInt32(arg1 + 0, ptr3, true);
   }
 
-  function trampoline7(arg0, arg1, arg2) {
+  function trampoline8(arg0, arg1, arg2) {
     var handle1 = arg0;
     var rep2 = handleTable0[(handle1 << 1) + 1] & ~T_FLAG;
     var rsc0 = captureTable0.get(rep2);
@@ -215,21 +225,17 @@ export async function instantiate(
   const handleTable1 = [T_FLAG, 0];
   const finalizationRegistry1 = finalizationRegistryCreate((handle) => {
     const { rep } = rscTableRemove(handleTable1, handle);
-    exports0["2"](rep);
+    exports0["3"](rep);
   });
 
   handleTables[1] = handleTable1;
-  const trampoline0 = rscTableCreateOwn.bind(null, handleTable1);
   function trampoline1(handle) {
     const handleEntry = rscTableRemove(handleTable1, handle);
     if (handleEntry.own) {
-      exports0["2"](handleEntry.rep);
+      exports0["3"](handleEntry.rep);
     }
   }
   function trampoline2(handle) {
-    return handleTable1[(handle << 1) + 1] & ~T_FLAG;
-  }
-  function trampoline4(handle) {
     const handleEntry = rscTableRemove(handleTable0, handle);
     if (handleEntry.own) {
       const rsc = captureTable0.get(handleEntry.rep);
@@ -241,34 +247,41 @@ export async function instantiate(
       }
     }
   }
+  const trampoline4 = rscTableCreateOwn.bind(null, handleTable1);
+  function trampoline5(handle) {
+    return handleTable1[(handle << 1) + 1] & ~T_FLAG;
+  }
   const withLogging =
     (callback, name) =>
     (...args) => {
       let result = callback(...args);
       console.log(
-        `Function '${name}' returned`,
-        result,
-        "with arguments:",
-        ...args
+        `Function '${name}' called with`,
+        ...args,
+        "returned",
+        result
       );
       return result;
     };
   Promise.all([module0, module1, module2]).catch(() => {});
   ({ exports: exports0 } = await instantiateCore(await module1));
   ({ exports: exports1 } = await instantiateCore(await module0, {
+    $root: {
+      log: exports0["0"],
+    },
     "[export]component-test:wit-protocol/employees": {
       "[resource-drop]employee": withLogging(trampoline1, "drop"),
       "[resource-new]employee": withLogging(trampoline0, "new"),
       "[resource-rep]employee": withLogging(trampoline2, "rep"),
     },
     "component-test:wit-protocol/companies": {
-      "[method]company.get-max-salary": trampoline5,
-      "[method]company.get-name": exports0["0"],
-      "[method]company.set-name": exports0["1"],
-      "[resource-drop]company": trampoline4,
+      "[method]company.get-max-salary": trampoline3,
+      "[method]company.get-name": exports0["1"],
+      "[method]company.set-name": exports0["2"],
+      "[resource-drop]company": trampoline2,
     },
     "component-test:wit-protocol/host-fns": {
-      "company-roundtrip": trampoline3,
+      "company-roundtrip": trampoline0,
     },
   }));
   memory0 = exports1.memory;
@@ -278,13 +291,18 @@ export async function instantiate(
       $imports: exports0.$imports,
       0: trampoline6,
       1: trampoline7,
-      2: exports1["component-test:wit-protocol/employees#[dtor]employee"],
+      2: trampoline8,
+      3: exports1["component-test:wit-protocol/employees#[dtor]employee"],
     },
   }));
   postReturn0 =
     exports1[
       "cabi_post_component-test:wit-protocol/employees#[method]employee.get-name"
     ];
+
+  function simple() {
+    exports1.simple();
+  }
 
   class Employee {
     constructor(arg0, arg1) {
@@ -308,7 +326,7 @@ export async function instantiate(
           rscTableRemove(handleTable1, handle2);
           rsc1[symbolDispose] = emptyFunc;
           rsc1[symbolRscHandle] = null;
-          exports0["2"](handleTable1[(handle2 << 1) + 1] & ~T_FLAG);
+          exports0["3"](handleTable1[(handle2 << 1) + 1] & ~T_FLAG);
         },
       });
       return rsc1;
@@ -389,7 +407,7 @@ export async function instantiate(
         rscTableRemove(handleTable1, handle2);
         rsc1[symbolDispose] = emptyFunc;
         rsc1[symbolRscHandle] = null;
-        exports0["2"](handleTable1[(handle2 << 1) + 1] & ~T_FLAG);
+        exports0["3"](handleTable1[(handle2 << 1) + 1] & ~T_FLAG);
       },
     });
     return rsc1;
@@ -506,5 +524,6 @@ export async function instantiate(
     guestFns,
     "component-test:wit-protocol/employees": employees,
     "component-test:wit-protocol/guest-fns": guestFns,
+    simple,
   };
 }

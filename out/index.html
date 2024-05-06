@@ -34,6 +34,9 @@
               return WebAssembly.compile(await data.arrayBuffer(), imports);
             },
             {
+              ["log"]: {
+                default: console.log,
+              },
               ["component-test:wit-protocol/companies"]: {
                 Company: MyCompany,
               },
