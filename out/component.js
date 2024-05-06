@@ -255,15 +255,9 @@ export async function instantiate(
     (callback, name) =>
     (...args) => {
       let result = callback(...args);
-      console.log(
-        `Function '${name}' called with`,
-        ...args,
-        "returned",
-        result
-      );
+      console.log(`Function ${name} called with`, ...args, `returned`, result);
       return result;
     };
-  Promise.all([module0, module1, module2]).catch(() => {});
   ({ exports: exports0 } = await instantiateCore(await module1));
   ({ exports: exports1 } = await instantiateCore(await module0, {
     $root: {
@@ -271,8 +265,8 @@ export async function instantiate(
     },
     "[export]component-test:wit-protocol/employees": {
       "[resource-drop]employee": withLogging(trampoline1, "drop"),
-      "[resource-new]employee": withLogging(trampoline0, "new"),
-      "[resource-rep]employee": withLogging(trampoline2, "rep"),
+      "[resource-new]employee": withLogging(trampoline4, "new"),
+      "[resource-rep]employee": withLogging(trampoline5, "rep"),
     },
     "component-test:wit-protocol/companies": {
       "[method]company.get-max-salary": trampoline3,
